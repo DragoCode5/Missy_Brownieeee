@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Love in Pixels – Choose your explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1e9ff;--panel:#faf0e8;--ink:#3b2a5a;--soft:#7a6a9a;--pink:#f4a6c0;--lav:#c9b6f2;--mint:#bfe8d2;--line:#3b2a5a;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1730;--panel:#2a2342;--ink:#f1e8ff;--soft:#b3a4d6;--line:#c9b6f2;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1d1730;--panel:#2a2342;--ink:#f1e8ff;--soft:#b3a4d6;--line:#c9b6f2;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:'VT323',ui-monospace,Menlo,monospace,sans-serif;font-size:22px;
+ background-image:linear-gradient(var(--lav) 1px,transparent 1px),linear-gradient(90deg,var(--lav) 1px,transparent 1px);background-size:32px 32px;background-blend-mode:soft-light}
+.app{max-width:900px;margin:0 auto;padding:12px 16px 16px;display:flex;flex-direction:column;gap:12px;min-height:100vh}
+h1{font:14px/1.5 'Press Start 2P',sans-serif,monospace;margin:4px 0 0;text-align:center}
+.sub{text-align:center;color:var(--soft);margin:0}
+.main{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:stretch}
+.box{background:var(--panel);border:4px solid var(--line);box-shadow:6px 6px 0 var(--pink);padding:14px}
+.stage{width:240px;display:flex;flex-direction:column;align-items:center;gap:10px;touch-action:pan-y;user-select:none}
+.stage .row{display:flex;align-items:center;gap:8px}
+#big{width:160px;height:240px;image-rendering:pixelated;max-height:42vh;max-width:100%;object-fit:contain}
+.floor{width:120px;height:10px;background:var(--lav);margin-top:-14px;opacity:.7}
+button{font:inherit;color:var(--ink);cursor:pointer}
+.arrow{font:14px 'Press Start 2P',sans-serif,monospace;width:48px;height:48px;background:var(--lav);border:4px solid var(--line);box-shadow:3px 3px 0 var(--line)}
+.arrow:active{transform:translate(3px,3px);box-shadow:none}
+.info{flex:1 1 280px;max-width:420px;display:flex;flex-direction:column;gap:8px}
+.info h2{font:14px/1.5 'Press Start 2P',sans-serif,monospace;margin:0}
+.tag{display:inline-block;background:var(--mint);color:#3b2a5a;border:3px solid var(--line);padding:0 8px;margin-right:6px}
+.info p{margin:0;line-height:1.15}
+.perk{color:var(--soft);border-top:3px dashed var(--lav);padding-top:8px}
+.go{margin-top:auto;font:12px 'Press Start 2P',sans-serif,monospace;padding:16px;background:var(--pink);color:#3b2a5a;border:4px solid var(--line);box-shadow:4px 4px 0 var(--line)}
+.go:active{transform:translate(4px,4px);box-shadow:none}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding:4px 4px 10px;justify-content:safe center}
+.th{flex:none;background:var(--panel);border:4px solid var(--line);padding:2px;opacity:.75}
+.th[aria-pressed="true"]{border-color:var(--pink);opacity:1;box-shadow:0 4px 0 var(--pink)}
+.th canvas{display:block;image-rendering:pixelated;width:36px;height:54px}
+.hide{display:none!important}
+#welcome{position:fixed;inset:0;background:rgba(29,23,48,.85);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9}
+#welcome .box{text-align:center;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:12px}
+#welcome h2{font:14px/1.6 'Press Start 2P',sans-serif,monospace;margin:0}
+:focus-visible{outline:4px solid var(--pink);outline-offset:2px}
+@media (max-height:480px){.app{padding:6px 12px}h1,.sub{display:none}#big{height:150px;width:100px}.stage{width:190px}.floor{margin-top:-10px}body{font-size:20px}.th canvas{width:28px;height:42px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+#game{position:fixed;inset:0;z-index:5;background:#2a2342;display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);user-select:none;-webkit-user-select:none;touch-action:none}
+#gw{position:relative;width:min(100vw,calc(100vh*1.6667));aspect-ratio:320/192}
+#gc{width:100%;height:100%;display:block;image-rendering:pixelated}
+#hud{position:absolute;top:4px;left:6px;right:6px;display:flex;gap:8px;align-items:center;color:#fff;text-shadow:2px 2px 0 #3b2a5a;font-size:20px;pointer-events:none}
+#hud .ob{flex:1;text-align:center;line-height:1}
+#hud button{pointer-events:auto;font:inherit;background:var(--lav);border:3px solid var(--line);padding:0 6px;text-shadow:none}
+#dlg{position:absolute;left:19%;right:19%;bottom:4%;background:var(--panel);border:3px solid var(--line);padding:6px 10px;font-size:22px;line-height:1.1;color:var(--ink)}
+#dlg b{display:block;color:var(--soft)}
+.db,#ab{background:var(--lav);border:4px solid var(--line);color:var(--ink);font:14px 'Press Start 2P',sans-serif,monospace;touch-action:none}
+#dp{position:fixed;left:calc(12px + env(safe-area-inset-left));bottom:calc(12px + env(safe-area-inset-bottom));display:grid;grid-template:repeat(3,46px)/repeat(3,46px);gap:2px;opacity:.85}
+#ab{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom));width:78px;height:78px;background:var(--pink);opacity:.9}
+.db:active,#ab:active{filter:brightness(.9)}
+#pz,#end{position:fixed;inset:0;z-index:8;background:rgba(29,23,48,.9);display:flex;align-items:center;justify-content:center;padding:12px}
+#pz .box,#end .box{max-width:420px;text-align:center;display:flex;flex-direction:column;gap:8px;max-height:100%;overflow:auto;align-items:center}
+#pz h2,#end h2{font:12px/1.5 'Press Start 2P',sans-serif,monospace;margin:0}
+#pz p,#end p{margin:0}
+.pr{display:flex;gap:8px;justify-content:center}
+.sm{font:inherit;padding:2px 14px;background:var(--lav);border:3px solid var(--line)}
+.spb{display:flex;gap:8px;justify-content:center}
+.sp2{width:72px;height:60px;background:var(--mint);border:4px solid var(--line);font:inherit}
+.sp2.on{background:var(--pink);transform:translateY(-4px)}
+.dgs{display:flex;gap:14px;justify-content:center}
+.dg{display:flex;flex-direction:column;align-items:center;gap:2px}
+.dg span{font:18px 'Press Start 2P',sans-serif,monospace}
+#rot{position:fixed;inset:0;z-index:20;background:#2a2342;color:#fff;display:none;align-items:center;justify-content:center;text-align:center;padding:20px;font-size:26px}
+@media (orientation:portrait){#rot{display:flex}}
+
+/* New screens: Inventory, Journal, Letter sheet */
+#inv,#jrn,#letter{display:none;position:fixed;inset:0;z-index:6;align-items:center;justify-content:center;padding:12px}
+#inv.show,#jrn.show,#letter.show{display:flex}
+#inv h2,#jrn h2,#letter h2{font:12px/1.5 'Press Start 2P',sans-serif,monospace;margin:0 0 8px}
+#inv .items,#jrn .entries{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+#inv .items div,#jrn .entries div{display:flex;gap:10px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line)}
+#inv .items div span,#jrn .entries div span{font-size:22px}
+#letter{padding:24px;background:var(--panel);border:4px solid var(--line);box-shadow:6px 6px 0 var(--pink)}
+#letter .sheet{border:2px dashed var(--line);padding:24px;background:#fffdf7;margin:0}
+#letter .sheet p{margin:0 0 8px;line-height:1.4;font-size:16px;text-align:left}
+#letter .sheet .sig{font-size:20px;color:#c9b6f2}
+/* Menu transitions */
+.app,.game-screen{transition:opacity .25s ease}
+.app.hide{opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Choose your explorer</h1>
+  <p class="sub">Swipe, tap the arrows, or use ← →</p>
+  <div class="main">
+    <div class="box stage" id="stage">
+      <div class="row">
+        <button class="arrow" id="prev" aria-label="Previous character">&lt;</button>
+        <canvas id="big" width="160" height="240"></canvas>
+        <button class="arrow" id="next" aria-label="Next character">&gt;</button>
+      </div>
+      <div class="floor"></div>
+    </div>
+    <div class="box info">
+      <h2 id="nm"></h2>
+      <div><span class="tag" id="role"></span></div>
+      <p id="blurb"></p>
+      <p class="perk" id="perk"></p>
+      <button class="go" id="go">Choose</button>
+    </div>
+  </div>
+  <div class="thumbs" id="thumbs" role="group" aria-label="All characters"></div>
+</div>
+<div id="welcome" class="hide">
+  <div class="box">
+    <canvas id="wc" width="160" height="240" style="image-rendering:pixelated;width:80px;height:120px"></canvas>
+    <h2 id="wt"></h2>
+    <p>Your story awaits</p>
+    <button class="go" id="mAdv">Adventure 🗝</button>
+    
+    
+    <button class="go" id="back">Change explorer</button>
+  </div>
+</div>
+<div id="game" class="hide">
+ <div id="gw">
+  <canvas id="gc" width="320" height="192"></canvas>
+  <div id="hud"><span id="hh" style="color:#ffb3d1"></span><span class="ob" id="ob"></span><button id="mu" aria-label="Mute">♪</button><button id="ps" aria-label="Pause">⏸</button><button id="thm" aria-label="Theme">Theme</button><button id="mn">Menu</button><button id="invBtn">Inv</button><button id="jrnBtn">Jrn</button></div>
+  <div id="dlg" class="hide"></div>
+ </div>
+ <div id="dp"><i></i><button class="db" data-k="arrowup" aria-label="Up">▲</button><i></i><button class="db" data-k="arrowleft" aria-label="Left">◀</button><i></i><button class="db" data-k="arrowright" aria-label="Right">▶</button><i></i><button class="db" data-k="arrowdown" aria-label="Down">▼</button><i></i></div>
+ <button id="ab">A</button>
+ <div id="pz" class="hide"><div class="box"><h2 id="pt"></h2><p id="pd"></p><div id="pb"></div><p id="pm" style="min-height:1.2em"></p><div class="pr"><button class="sm" id="ph">Hint</button><button class="sm" id="px">Close</button></div></div></div>
+ <div id="end" class="hide"><div class="box"><h2>Chapter 1 complete!</h2><p id="eh"></p><p>The flower gate is open. The Garden of Beginnings is next.</p><div class="pr"><button class="sm" id="ea">Play again</button><button class="sm" id="em">Menu</button><button class="sm" id="creditsBtn">Credits</button><button class="sm" id="letBtn">Letters</button><button class="sm" id="jrnBtn">Journal</button><button class="sm" id="setBtn">Settings</button><button class="sm" id="exp">Export save</button><button class="sm" id="im">Import save</button></div></div><input type="file" id="imf" hidden style="display:none"></div>
+ <div id="letters" class="hide"><div class="box"><h2>Letters</h2><div id="ld"></div><div class="pr"><button class="sm" id="lx">Close</button></div></div></div>
+<div id="inv" class="hide"><div class="box"><h2>Inventory</h2><div id="invd"></div><div class="pr"><button class="sm" id="ix">Close</button></div></div></div>
+<div id="jrn" class="hide"><div class="box"><h2>Journal</h2><div id="jrd"></div><div class="pr"><button class="sm" id="jx">Close</button></div></div></div>
+<div id="letter" class="hide"><div class="box"><h2>Your Letter</h2><div id="letterd"></div><div class="pr"><button class="sm" id="lx2">Close</button></div></div></div>
+ <div id="settings" class="hide"><div class="box"><h2>Settings</h2><label style="display:flex;gap:10px;align-items:center"><span style="width:70px">Music</span><input type="range" id="smv" min="0" max="100" value="100" style="flex:1"></label><label style="display:flex;gap:10px;align-items:center"><span style="width:70px">SFX</span><input type="range" id="sfxv" min="0" max="100" value="100" style="flex:1"></label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="redA"><span>Reduced animations</span></label><div class="pr"><button class="sm" id="sx">Close</button></div></div></div>
+  <div id="credits" class="hide"><div class="box"><h2>Credits</h2><p>Kobby — wrote the personal letter (Letter 1).</p><p>Mireille — the Little Café hostess.</p><p>Missy — the explorer you play.</p><p>The townspeople — were waiting.</p><div class="pr"><button class="sm" id="cr">Close</button></div></div></div>
+ <div id="rot">Turn your phone sideways to play</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ---- Draft placeholder data: swap names/blurbs freely, no code changes needed ----
+const CHARS=[
+ {id:'missy',name:'Missy',role:'Explorer',age:'Age: 20s',blurb:'Curious and observant. Notices the small details and smiles easily.',perk:'Idea: sees sparkles near hidden clues',skin:'#8b5a3a',hair:'#1c1224',top:'#f7c6d9',bottom:'#8b5a3a',shoe:'#ffffff',skirt:'#e8c4b8',longHair:1,braids:1,wide:1,torso:7,leg:8},
+ {id:'gospel',name:'Gospel',role:'Little Adventurer',age:'Age: 10',blurb:'Excited, impatient, full of questions. A little scared but brave.',perk:'Idea: squeezes through small gaps',skin:'#f0cfa8',hair:'#2d2b2b',top:'#bfe0f5',bottom:'#6b94d1',shoe:'#ffffff',tuft:1,torso:5,leg:5},
+ {id:'owusu',name:'Sgt. Brown',role:'Soldier',age:'Adult',blurb:'Strong and disciplined. Short sentences. Treats every puzzle as a mission.',perk:'Idea: hints cost nothing extra',skin:'#452d22',hair:'#1c1224',top:'#5f7a5a',bottom:'#35527f',shoe:'#2b2b2b',cap:'#3d4a3a',medal:1,wide:1,torso:7,leg:8},
+ {id:'kobby',name:'Kobby',role:'Young Man',age:'Age: 20',blurb:'Calm and reserved. Speaks little, thinks first, dry humour.',perk:'Idea: walks faster',skin:'#5c4a3a',hair:'#2d2b2b',top:'#ffffff',bottom:'#4a6fa5',long:1,shoe:'#f1e8ff',tuft:1,torso:6,leg:7},
+ {id:'prince',name:'Prince',role:'Teen Explorer',age:'Age: 16',blurb:'Confident and a bit dramatic, but secretly earnest. Wants to be taken seriously.',perk:'Idea: tries risky shortcuts',skin:'#6b4a38',hair:'#1c1224',top:'#4caf7d',bottom:'#3f5f94',shoe:'#ffffff',grad:1,shirt:['ST.','JOHN’S'],tuft:1,torso:6,leg:7},
+ {id:'angel',name:'Angel',role:'Young Explorer',age:'Age: 12',blurb:'Fearless, imaginative, a little careless. Collects tiny treasures.',perk:'Idea: finds things in the background',skin:'#5a3c40',hair:'#1c1224',top:'#fde2f0',bottom:'#5a3c40',shoe:'#ffffff',skirt:'#bfe8d2',tuft:1,torso:5,leg:6},
+ {id:'scolded',name:'The boy who got scolded',role:'Teen Explorer',age:'Age: 15',blurb:'Defensive but sorry. Hesitant, awkward, quick to joke his way out.',perk:'Idea: gets hints sooner',skin:'#7a5a3c',hair:'#2d2b2b',top:'#a8d8c8',bottom:'#5578b0',shoe:'#f1e8ff',kerc:'#d96b6b',tuft:1,torso:6,leg:7},
+ {id:'mrsbrown',name:'Mrs. Brown',role:'Community Elder',age:'Adult',blurb:'Gentle and wise. The quiet heart of the town, always ready to listen.',perk:'Idea: always ready to listen',skin:'#e8c9a8',hair:'#2d2b2b',top:'#d9b6e8',bottom:'#e8c9a8',shoe:'#8a6a5a',skirt:'#f2d8b0',afro:1,torso:6,leg:6}
+];
+const ORDER=['missy','gospel','angel','owusu','mrsbrown','prince','kobby','scolded'];CHARS.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));
+// ---- Sprite: 16x24 logical grid, drawn with fillRect (blink=true closes eyes) ----
+function drawChar(g,c,s,bob,blink){
+ const t=c.torso||6,l=c.leg||6,hd=2,tt=hd+7,lt=tt+t,oy=24-(tt+t+l)+bob;
+ const d=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(x*s,(y+oy)*s,w*s,h*s)};
+ const bw=c.wide?10:8,bx=c.wide?3:4;
+ g.clearRect(0,0,16*s,24*s);
+ if(c.longHair)d(3,hd,10,12,c.hair);
+ if(c.bun)d(6,hd-3,4,2,c.hair);
+ if(c.afro){d(5,hd-4,6,1,c.hair);d(3,hd-3,10,1,c.hair);d(2,hd-2,12,6,c.hair);d(3,hd+4,10,1,c.hair);[[4,-3],[7,-4],[10,-3],[2,-1],[13,0],[3,2],[12,3],[6,-2],[9,-1],[2,3],[13,2]].forEach(q=>d(q[0],hd+q[1],1,1,'#524b4b'))}
+ d(4,lt,8,1,c.bottom);d(4,lt,3,l-1,c.bottom);d(9,lt,3,l-1,c.bottom);
+ d(3,lt+l-1,4,1,c.shoe);d(9,lt+l-1,4,1,c.shoe);
+ d(bx,tt,bw,t,c.top);if(!c.skirt)d(bx,lt-1,bw,1,'#2e3f63');
+ if(c.skirt){d(bx-1,lt-1,bw+2,3,c.skirt);d(bx,lt+2,bw,1,c.skirt)}
+ d(bx-2,tt,2,t-1,c.skin);d(bx+bw,tt,2,t-1,c.skin);
+ d(bx-2,tt,2,2,c.top);d(bx+bw,tt,2,2,c.top);if(c.long){d(bx-2,tt,2,t-2,c.top);d(bx+bw,tt,2,t-2,c.top);d(7,tt+1,1,t-2,'#d8d0e6')}
+ if(c.kerc){d(5,tt,6,1,c.kerc);d(7,tt+1,2,2,c.kerc)}
+ if(c.medal)d(bx+1,tt+2,2,2,'#f2c94c');
+ if(c.shirt){if(s<6){d(6,tt+2,4,1,'#fff');d(5,tt+4,6,1,'#fff')}else{g.fillStyle='#fff';g.font=Math.round(s*.9)+'px "Press Start 2P",monospace';g.textAlign='center';g.fillText(c.shirt[0],8*s,(tt+oy+2.6)*s);g.fillText(c.shirt[1],8*s,(tt+oy+4.3)*s)}}
+ d(4,hd,8,7,c.skin);
+ d(4,hd-1,8,3,c.hair);
+ if(c.tuft||c.longHair){d(3,hd,1,3,c.hair);d(12,hd,1,3,c.hair)}
+ if(c.cap){d(3,hd-2,10,3,c.cap);d(3,hd+1,10,1,c.cap);d(7,hd-1,2,1,'#f2c94c')}
+ if(c.grad)d(3,hd+5,1,1,'#ffe08a');
+ if(c.braids){for(let k=0;k<7;k++){const col=k%2?'#4a3860':c.hair;d(3,hd+3+k*2,2,2,col);d(11,hd+3+k*2,2,2,col)}d(3,hd+17,2,1,'#f4a6c0');d(11,hd+17,2,1,'#f4a6c0')}
+ if(blink){d(6,hd+4,1,1,c.skin);d(9,hd+4,1,1,c.skin)}else{d(6,hd+4,1,1,'#2b1b3d');d(9,hd+4,1,1,'#2b1b3d')}
+ d(5,hd+5,1,1,'#f4a6a0');d(10,hd+5,1,1,'#f4a6a0');d(7,hd+6,2,1,'#b5504f');
+}
+// ---- UI ----
+const $=id=>document.getElementById(id),big=$('big').getContext('2d'),KEY='lip_char';
+let cur=0,bob=0,blink=false,tick=0;
+try{const sv=localStorage.getItem(KEY);const i=CHARS.findIndex(c=>c.id===sv);if(i>=0)cur=i}catch(e){}
+const th=$('thumbs');
+CHARS.forEach((c,i)=>{
+ const b=document.createElement('button');b.className='th';b.setAttribute('aria-label',c.name);
+ const cv=document.createElement('canvas');cv.width=48;cv.height=72;
+ drawChar(cv.getContext('2d'),c,3,0,false);b.appendChild(cv);
+ b.onclick=()=>show(i);th.appendChild(b);
+});
+function show(i){
+ cur=(i+CHARS.length)%CHARS.length;const c=CHARS[cur];
+ $('nm').textContent=c.name;$('role').textContent=c.role;
+ $('blurb').textContent=c.blurb;$('perk').textContent=c.perk;
+ [...th.children].forEach((b,k)=>b.setAttribute('aria-pressed',k===cur));
+ th.children[cur].scrollIntoView({inline:'center',block:'nearest'});
+ draw();
+}
+function draw(){drawChar(big,CHARS[cur],10,bob,blink)}
+setInterval(()=>{tick++;bob=tick%2?0:-1;blink=tick%7===0;draw()},450);
+$('prev').onclick=()=>show(cur-1);$('next').onclick=()=>show(cur+1);
+addEventListener('keydown',e=>{
+ if(window.gameOn||!$('welcome').classList.contains('hide'))return;
+ if(e.key==='ArrowLeft')show(cur-1);else if(e.key==='ArrowRight')show(cur+1);else if(e.key==='Enter')choose();
+});
+let sx=null;const st=$('stage');
+st.addEventListener('pointerdown',e=>{sx=e.clientX});
+st.addEventListener('pointerup',e=>{if(sx!==null&&Math.abs(e.clientX-sx)>40)show(cur+(e.clientX<sx?1:-1));sx=null});
+function choose(){
+ const c=CHARS[cur];
+ try{localStorage.setItem(KEY,c.id)}catch(e){}
+ drawChar($('wc').getContext('2d'),c,10,0,false);
+ $('wt').textContent='Welcome, '+c.name+'!';
+ $('welcome').classList.remove('hide');$('back').focus();
+}
+$('go').onclick=choose;
+// ===== Chapter 1: The Little Town =====
+const TS=16,W=34,H=20,SPD=62,AN='Mrs. Adjoa',gc=$('gc'),gx=gc.getContext('2d'),sc=document.createElement('canvas'),sg=sc.getContext('2d');
+sc.width=16;sc.height=24;gx.imageSmoothingEnabled=false;
+const AJ={skin:'#8b6a4a',hair:'#2d2b2b',top:'#f4a6c0',bottom:'#8b6a4a',shoe:'#8a6a5a',skirt:'#bfe0f5',bun:1,torso:6,leg:6};
+const CD={name:'Mireille',skin:'#f0c8a8',hair:'#2d2b2b',top:'#fff3a0',bottom:'#fde2f0',shoe:'#ffffff',skirt:'#bfe0f5',bun:1,torso:5,leg:5};
+const NOTE='Dear Explorer, the Lantern has fallen and the Hush has reached the edge of town. Don’t be afraid. It only takes what is forgotten. Start with the torn picture.';
+const LN={
+missy:['The colour has gone from the edges first. Did it fade slowly, or all at once?','Somewhere pretty, with flowers? I’ll check the flower bed.','Look, there’s a faint path in the hedge. Someone has walked here before.','The lantern has six tiny stars drawn around it. I think that’s the real clue.','Wait, please. I’m not going to hurt you. Who are you?'],
+gospel:['Whoa, everything is grey! Is this a game? Can I help look?','Maybe your glasses are hiding in the flowers! I’ll look low, where grown-ups never look.','I found it! I found it! Do I get a prize?','Six stars? That’s so many! Can we get a snack first?','Ooh, who’s that? He looks cool. Hey, wait for me!'],
+owusu:['Report, please. When did the colour begin to fade?','Understood, ma’am. Objective: find your glasses. I’ll sweep the flower bed.','Objective secured. One piece down, three to go.','Six stars. Then that is our mission: recover all six.','Halt. Identify yourself. Who sent you?'],
+kobby:['That’s not normal. How long has it been like this?','Sure, I’ll take a look. Flower bed, you said?','Okay. One down.','A lantern with six stars. I guess that’s the plan.','Who was that? Strange. Let’s keep going.'],
+angel:['Ooh, everything’s gone grey! Like a secret level! I bet there are treasures hiding in it.','Glasses in the flowers? Ooh, I’ll find those and any shiny things on the way!','Got one! And a pretty pebble too. That counts as two.','A lantern with six stars! I want every single one, even the tiny ones.','Wait! Who are you? Did you drop anything? Aw, nothing shiny.'],
+prince:['Grey? Hm. Fine. I’ve handled worse. Probably. So, what’s the plan?','Glasses, in a flower bed. Easy. Two minutes. Maybe one.','Told you. One piece, zero problems. Okay, maybe a few problems.','Six stars. A bit dramatic, but I respect it. Let’s go.','Hey! You there! Stop. I will catch you. ...Okay, he’s fast.'],
+mrsbrown:['Oh, my dears, the colour has slipped away. Don’t worry, nothing is lost for good. Tell me what you remember.','Somewhere with flowers, dear? Let me look slowly. Things hide best from people in a hurry.','There we are. One piece home, three to go. No rush.','A lantern with six little stars. Someone is asking us to remember something kind.','Gently, dear one. We mean you no harm. Who sends you?'],
+scolded:['I didn’t do it, okay? ...Sorry, habit. It went grey on its own, right?','Fine, I’ll look. It’s not like I’ll get yelled at for looking. Right?','Okay, that worked. Don’t look at me like that, I’m allowed to get one right.','Six stars... that’s a lot. Fine. Better than getting told off for not helping.','Who was that? Not my problem. ...Okay, it is a little my problem.']};
+const COL=[['pink','#f48fb8'],['mint','#8fd9b6'],['blue','#7fb8e8'],['peach','#ffc48a']];
+const KF={skin:'#6b4430',hair:'#2d2b2b',top:'#7a5fb0',bottom:'#3f5f94',shoe:'#cbb5f0',cap:'#7a5fb0',torso:6,leg:7};
+const MZ=['.#.....','.#.###.','.....#.','##.G.#.','...#.#.','.#.#...','..#.##.'];
+let GN='Gospel';
+const MAP=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++){const b=x==0||y==0||y==H-1||(x==W-1&&y!=5&&y!=6),p=((y==5||y==6)&&x>5)||(x==10&&y>2&&y<9);r+=b?'T':p?'p':'.'}MAP.push(r)}
+const GZ=['fff.','....','....','.b..','..b.','...g'];
+[4,5,6,7,8,9].forEach(y=>{MAP[y]=MAP[y].slice(0,20)+GZ[y-4]});
+const CF=['.....','.....','.....','.....'];
+[15,16,17,18].forEach((y,k)=>{MAP[y]=MAP[y].slice(0,4)+CF[k]+MAP[y].slice(9)});
+const BZ=['....','....','....','....','....','....'];
+[8,9,10,11,12,13].forEach((y,k)=>{MAP[y]=MAP[y].slice(0,24)+BZ[k]});
+const CZ=['....','....','....','....','....','....'];
+[8,9,10,11,12,13].forEach((y,k)=>{MAP[y]=MAP[y].slice(0,28)+CZ[k]});
+const DZ=['..','..','..','..','..'];
+[8,9,10,11,12].forEach((y,k)=>{MAP[y]=MAP[y].slice(0,32)+DZ[k]});
+const O=(id,k,x,y,w,h,e={})=>({id,k,x,y,w,h,s:1,i:1,...e});
+const OB=[O('shop','shop',2,1,3,2,{i:0}),O('adjoa','npc',3,3,1,1,{ch:AJ}),O('fountain','fountain',8,2,2,2),O('gospel','npc',8,4,1,1),
+O('h0','house',12,1,2,2,{d:'blue',dc:COL[2][1],rc:'#c9b6f2'}),O('h1','house',14,1,2,2,{d:'mint',dc:COL[1][1],rc:'#f4a6c0'}),O('h2','house',16,1,2,2,{d:'pink',dc:COL[0][1],rc:'#bfe0f5'}),
+O('chest','chest',14,8,1,1),O('bench','bench',15,8,2,1,{i:0}),O('maze','maze',10,9,2,2),
+O('b0','bed',5,9,1,1),O('b1','bed',17,9,1,1),O('b2','bed',2,6,1,1),O('gate','gate',19,5,1,2),O('kofi','kofi',18,5,1,1,{s:0,i:0,ch:KF}),O('garden_flowers','garden_flowers',20,4,3,2),O('butterflies','butterflies',21,7,3,3),O('garden_key','garden_key',23,9,1,1),O('cafe','cafe',5,15,3,3),O('table','table',5,17,3,2),O('cafenpc','cafenpc',7,16,1,2),O('bridge','bridge',26,9,2,2),O('river','river',24,11,4,2),O('lights','lights',25,8,3,3),O('gm','gm',28,9,1,1),O('gf','gf',30,9,1,1),O('archive','archive',29,10,2,2),O('library','library',31,11,2,2),O('finaldoor','finaldoor',30,12,1,2),O('lantern','lantern',32,8,2,4),O('well','well',3,3,2,2),O('flowerstand','flowerstand',5,8,2,2),O('secretjar','secretjar',8,15,1,2)];
+const DF={intro:0,met:0,adjoa:0,glasses:0,p1:0,p2:0,p3:0,p4:0,key:0,gate:0,g1:0,gkey:0,garden:0,cafewelcome:0,c3a:0,c3b:0,c3c:0,cafe:0,c3w:0,knifeTut:0,c4a:0,c4b:0,c4c:0,bridge:0,gm:0,gf:0,c5a:0,c5b:0,c5c:0,ch5:0,c6qa:0,c6fin:0,ch6:0,ch2:0,ch3:0,ch4:0,sec:0};
+const LET1="Dear Missy,\n\nI have spent some time getting to know you, and I think I'm starting to understand just how much you mean to me. I like the way you laugh and smile all the time — no, I don't like it, I love it. I made this as a small gift to you.\n\nI do not know the name of your other brother, so I put \"The boy who got scolded\" there, sorry for that. I miss the times when we used to talk after church — I miss you a lot. And I wish I could see you again. But you are always in my heart and mind.\n\nI saw your other siblings in church the last time. I saw Gospel — light-skinned, handsome boy. He was laughing. I saw ANgel too, she looks just like you. Then I saw Prince, the one at John's. I saw your Mom too, beautiful as always. I decided to rewrite the game and add them. It is a little world I made with care and love, because you deserve a world made especially for you.\n\nThank you for being you, and thanks for lighting it up and filling my life with colour. I hope you love and like it.\n\nI am an ocean full of love, come and set sail on me. I await you, Beautiful Ship.\n\nBYEEEEEEEE";
+let F={...DF},P,CH,mode='menu',dq=[],dcb=null,PT=[],raf=0,last=0,AC=null,mute=false,pau=0;const K={};
+function load(){let f={...DF};try{const o=JSON.parse(localStorage.getItem('lip_save'));if(o&&typeof o==='object')for(const k in DF)f[k]=o[k]===1?1:f[k]}catch(e){}return f.gate?{...DF}:f}
+function save(){try{localStorage.setItem('lip_save',JSON.stringify(F))}catch(e){}}
+const pcs=()=>F.p1+F.p2+F.p3+F.p4;
+const hearts=()=>(pcs()>=2?1:0)+(pcs()>=4?1:0)+(F.key?1:0);
+const obj=()=>F.gate?'Chapter complete':F.key?'Open the flower gate':F.garden?'The garden is open — the flowers await you':F.cafewelcome?'Explore the town — the Little Café is open':F.bridge?'The Bridge of Stars stands ahead':F.ch5?'The Memory Castle is open — the memories return':F.ch6?'The Lantern of the Place is lit — the stars gather above':pcs()==4?'Put the picture together with '+GN:!F.met?'Find the boy by the fountain':'Find the picture pieces ('+pcs()+'/4)';
+function hud(){$('hh').textContent='\u2665'.repeat(hearts())+'\u2661'.repeat(3-hearts())+(F.key?' \ud83d\udd11':'');$('ob').textContent=obj();gc.style.filter='grayscale('+(F.gate?0:Math.max(.15,.9-.2*pcs()))+')'}
+function tone(f,d=.12,w=0){if(mute)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume&&AC.resume();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+w;o.type='square';o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(AC.destination);o.start(t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.stop(t+d)}catch(e){}}
+const sfx=a=>a.forEach((f,i)=>tone(f,.12,i*.09));
+function burst(x,y,c,n=14){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=20+Math.random()*50;PT.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-30,l:.7,c})}}
+function reward(){burst(P.x,P.y-12,'#f4a6c0');burst(P.x,P.y-12,'#f2c94c',8);sfx([523,659,784,1047])}
+function reveal(){burst(P.x,P.y-12,'#f4a6c0');burst(P.x,P.y-12,'#f2c94c',8);sfx([523,659,784,1047])}
+function say(l,cb){dq=l.slice();dcb=cb;mode='dlg';nx()}
+function nx(){const d=$('dlg');if(!dq.length){d.classList.add('hide');mode='play';const c=dcb;dcb=null;c&&c();return}const l=dq.shift();d.innerHTML='';if(l[0]){const b=document.createElement('b');b.textContent=l[0];d.appendChild(b)}const s=document.createElement('span');s.textContent=l[1];d.appendChild(s);d.classList.remove('hide');tone(440,.05)}
+function hit(x,y){const l=x-5,r=x+5,t=y-4,b=y;if(l<0||t<0||r>W*TS||b>H*TS)return true;for(let ty=Math.floor(t/TS);ty<=Math.floor((b-.01)/TS);ty++)for(let tx=Math.floor(l/TS);tx<=Math.floor((r-.01)/TS);tx++)if(MAP[ty][tx]=='T')return true;for(const o of OB)if(o.s&&!(r<=o.x*TS||l>=(o.x+o.w)*TS||b<=o.y*TS||t>=(o.y+o.h)*TS))return true;return false}
+function near(){let b=null,bd=99;for(const o of OB){if(!o.i)continue;const rx=o.x*TS,ry=o.y*TS,py=P.y-3,dx=Math.max(rx-P.x,0,P.x-(rx+o.w*TS)),dy=Math.max(ry-py,0,py-(ry+o.h*TS)),d=Math.hypot(dx,dy);if(d<14&&d<bd){bd=d;b=o}}return b}
+function upd(dt){if(pau||mode!=='play'){P.vx=P.vy=0;P.mv=0;return}let ax=(K.arrowright||K.d?1:0)-(K.arrowleft||K.a?1:0),ay=(K.arrowdown||K.s?1:0)-(K.arrowup||K.w?1:0);if(ax&&ay){ax*=.7071;ay*=.7071}const f=Math.min(1,dt*14);P.vx+=(ax*SPD-P.vx)*f;P.vy+=(ay*SPD-P.vy)*f;const nx_=P.x+P.vx*dt;if(!hit(nx_,P.y))P.x=nx_;else P.vx=0;const ny=P.y+P.vy*dt;if(!hit(P.x,ny))P.y=ny;else P.vy=0;P.mv=Math.hypot(P.vx,P.vy)>8}
+const R=(x,y,w,h,c)=>{gx.fillStyle=c;gx.fillRect(Math.round(x),Math.round(y),w,h)};
+function drawOb(o,t){const X=o.x*TS,Y=o.y*TS;switch(o.k){
+case 'shop':R(X,Y+12,48,20,'#faf0e8');R(X,Y+12,48,2,'#e0cdbf');R(X-2,Y,52,14,'#f4a6c0');R(X-2,Y+8,52,3,'#e58aa8');R(X+19,Y+16,10,16,'#7a5a8a');R(X+6,Y+17,8,7,'#bfe0f5');R(X+34,Y+17,8,7,'#bfe0f5');break;
+case 'npc':drawChar(sg,o.ch,1,0,false);gx.drawImage(sc,X,Y-8);break;
+case 'kofi':if(F.kofiShow){drawChar(sg,o.ch,1,0,false);gx.drawImage(sc,X,Y-8)}break;
+case 'fountain':R(X,Y+10,32,22,'#d9d0e8');R(X,Y+10,32,3,'#efe8f8');R(X+3,Y+14,26,14,'#bfe0f5');R(X+13,Y+3,6,15,'#d9d0e8');for(let i=0;i<3;i++){const h=3+((t*6+i*2)|0)%3;R(X+6+i*9,Y+13-h,2,h,'#e6f4ff')}break;
+case 'house':R(X,Y+10,32,22,'#faf0e8');R(X-2,Y+2,36,10,o.rc);R(X+11,Y+17,10,15,'#3b2a5a');R(X+12,Y+18,8,14,o.dc);R(X+3,Y+16,5,5,'#bfe0f5');R(X+24,Y+16,5,5,'#bfe0f5');break;
+case 'chest':R(X+1,Y+6,14,9,'#b07a4a');R(X+1,Y+4,14,4,F.p3?'#7a4f2a':'#c9955f');R(X+7,Y+8,2,3,'#f2c94c');break;
+case 'bench':R(X,Y+5,32,4,'#c9955f');R(X,Y+9,32,1,'#a87a4a');R(X+2,Y+10,3,6,'#8a6a5a');R(X+27,Y+10,3,6,'#8a6a5a');break;
+case 'maze':R(X,Y+4,32,28,'#4fa57e');R(X+2,Y+6,28,24,'#6fc29a');R(X+12,Y+22,8,10,'#bfe8d2');R(X+6,Y+10,6,2,'#8fd6b3');R(X+20,Y+14,6,2,'#8fd6b3');break;
+case 'bed':R(X+1,Y+8,14,7,'#8a6a5a');[[3,5,'#f48fb8'],[7,3,'#ffc48a'],[11,5,'#7fb8e8'],[5,9,'#f2c94c'],[10,9,'#f48fb8']].forEach(f=>{R(X+f[0],Y+f[1],3,3,f[2]);R(X+f[0]+1,Y+f[1]+3,1,3,'#6fc29a')});break;
+case 'gate':R(X,Y,3,32,'#c9b6f2');R(X+13,Y,3,32,'#c9b6f2');for(let k=0;k<4;k++){if(!F.gate){R(X+3,Y+4+k*8,10,2,'#6fc29a');R(X+6+(k%2)*3,Y+2+k*8,3,3,'#f4a6c0')}else{R(X-2,Y+4+k*8,3,3,'#f4a6c0');R(X+15,Y+4+k*8,3,3,'#f4a6c0')}}break;case 'garden_flowers':for(let i=0;i<3;i++){R(X+i*6,Y+4,4,3,'#ffd166');R(X+i*6+1,Y+5,2,3,'#f4a6c0')}break;case 'butterflies':[[3,3],[4,4],[5,5]].forEach(p=>{R(X+p[0]*4-2,Y+p[1]*4,6,10,'#ffd166');R(X+p[0]*4+1,Y+p[1]*4,3,6,'#f2c94c')});break;case 'garden_key':if(F.gkey){R(X+1,Y+2,4,3,'#8a6a5a');R(X+2,Y+1,3,3,'#f2c94c')}break;case 'cafe':R(X,Y+6,36,10,'#faf0e8');R(X+4,Y,8,8,'#b07a4a');R(X+4,Y+4,28,4,'#e58aa8');R(X+12,Y+8,16,8,'#fff3a0');R(X+2,Y+14,6,2,'#c9955f');break;case 'table':R(X,Y+8,28,2,'#c9955f');R(X,Y+4,28,6,'#b07a4a');R(X+10,Y+12,6,2,'#8a6a5a');break;case 'cafenpc':drawChar(sg,o.ch,1,0,false);gx.drawImage(sc,X,Y-8);break;case 'bridge':R(X,Y+4,32,6,'#c9b6f2');R(X+4,Y,24,8,'#fff3a8');break;case 'river':R(X,Y+2,40,2,'#4fa57e');R(X+12,Y+10,8,2,'#6fc29a');R(X+20,Y+10,8,2,'#6fc29a');break;case 'lights':for(let i=0;i<3;i++)R(X+i*10,Y+6,6,8,'#f2c94c');break;case 'castle':R(X,Y+6,36,10,'#f2c94c');R(X+4,Y,8,8,'#7a5fb0');R(X+4,Y+4,28,4,'#c9b6f2');R(X+2,Y+14,6,2,'#5c4a3a');break;case 'archive':R(X,Y+4,20,8,'#c9b6f2');R(X+4,Y+12,4,2,'#8a6a5a');R(X+2,Y+4,2,2,'#b07a4a');break;case 'library':R(X,Y+6,24,8,'#b07a4a');R(X+4,Y+6,16,6,'#a87a4a');break;case 'finaldoor':R(X+2,Y+2,4,12,'#2e3f63');R(X+2,Y+12,4,4,'#3b2a5a');break;case 'lantern':R(X,Y+8,36,8,'#fff3a8');R(X+8,Y+2,8,10,'#f2c94c');R(X+4,Y+6,8,2,'#c9955f');R(X+12,Y+6,8,2,'#c9955f');R(X+18,Y+12,2,6,'#6fc29a');break;case 'well':R(X+2,Y+6,14,6,'#c9955f');R(X+5,Y+10,6,6,'#8a6a5a');R(X+2,Y+4,10,2,'#a87a4a');break;case 'flowerstand':R(X+2,Y+12,6,4,'#8a6a5a');R(X,Y+8,12,4,'#ffd166');R(X+2,Y+6,8,2,'#f4a6c0');break;case 'secretjar':R(X,Y+6,10,10,'#f48fb8');R(X+4,Y+4,10,2,'#f2c94c');R(X+2,Y+12,4,2,'#8a6a5a');break}}
+function render(t){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const m=MAP[y][x],X=x*TS,Y=y*TS;if(m=='p'){R(X,Y,16,16,'#f2d8b0');R(X+3,Y+4,2,2,'#e6c79a');R(X+10,Y+11,2,2,'#e6c79a')}else{R(X,Y,16,16,'#bfe8d2');if((x*7+y*3)%4==0){R(X+4,Y+5,1,3,'#9fd6bb');R(X+10,Y+10,1,3,'#9fd6bb')}}if(m=='T'){R(X+6,Y+8,4,8,'#8a6a5a');R(X,Y,16,11,'#6fc29a');R(X+2,Y+1,6,3,'#8fd6b3')}}
+const L=OB.map(o=>({y:(o.y+o.h)*TS,f:()=>drawOb(o,t)}));L.push({y:P.y,f:()=>{drawChar(sg,CH,1,P.mv?(Math.floor(t*8)%2?0:-1):0,false);gx.drawImage(sc,Math.round(P.x-8),Math.round(P.y-24))}});L.sort((a,b)=>a.y-b.y).forEach(e=>e.f());
+PT.forEach(p=>R(p.x,p.y,2,2,p.c));if(mode==='play'){const o=near();if(o){const cx=o.x*TS+o.w*TS/2-4,cy=Math.max(2,o.y*TS-8);R(cx,cy,8,9,'#f4a6c0');R(cx+3,cy+2,2,4,'#3b2a5a');R(cx+3,cy+7,2,1,'#3b2a5a')}}}
+function loop(n){if(!window.gameOn){raf=0;return}const dt=Math.min(.05,(n-last)/1000);last=n;upd(dt);PT=PT.filter(p=>(p.l-=dt)>0);PT.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=90*dt});render(n/1000);raf=requestAnimationFrame(loop)}
+function mk(t,f){const e=document.createElement('button');e.className='sm';e.textContent=t;e.onclick=f;return e}
+function openPz(title,desc,build,hints){mode='puz';window.pzKey=null;$('pt').textContent=title;$('pd').textContent=desc;$('pm').textContent='';const b=$('pb');b.innerHTML='';build(b);let hi=0,st=0;$('ph').onclick=()=>{if(st){clearTimeout(st);st=0}$('pm').textContent=hints[Math.min(hi++,hints.length-1)];st=setTimeout(()=>{const t=hints[Math.min(hi,hints.length-1)];if(t&&t!==$('pm').textContent){$('pm').textContent=t;hi++}},30000)};$('px').onclick=closePz;$('pz').classList.remove('hide')}
+function closePz(){$('pz').classList.add('hide');if(mode==='puz')mode='play'}
+function getPiece(n){const first=pcs()==0;F['p'+n]=1;save();hud();reward();const L=[['','You found picture piece '+n+' of 4.']];if(first)L.unshift([CH.name,LN[CH.id][2]]);say(L)}
+function pzF(){const seq=[0,2,1],btn=[];let inp=[],busy=1;
+openPz('The Fountain','Watch the water, then press the spouts in the same order.',b=>{const w=document.createElement('div');w.className='spb';['Left','Middle','Right'].forEach((n,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent=n;e.onclick=()=>click(i);btn.push(e);w.appendChild(e)});b.appendChild(w);b.appendChild(mk('Watch again',()=>{if(!busy)play()}))},['Watch the water.','The water jumps three times.','Left, then right, then the middle one.']);
+function flash(i,ms){btn[i].classList.add('on');tone(330+i*110);setTimeout(()=>btn[i].classList.remove('on'),ms)}
+function play(){busy=1;inp=[];const s2=seq.concat(seq);s2.forEach((s,k)=>setTimeout(()=>flash(s,350),500+k*700+(k>=3?500:0)));setTimeout(()=>busy=0,1000+s2.length*700)}
+function click(i){if(busy)return;flash(i,200);inp.push(i);const k=inp.length-1;if(inp[k]!==seq[k]){$('pm').textContent='Not quite. Watch again!';busy=1;setTimeout(play,900)}else if(inp.length===seq.length){busy=1;setTimeout(()=>{closePz();getPiece(1)},500)}}
+play()}
+function pzC(){const v=[3,3,3];
+openPz('The Old Chest','Set the three dials to the door colours.',b=>{const w=document.createElement('div');w.className='dgs';v.forEach((_,i)=>{const e=document.createElement('button');e.className='sp2';e.style.background=COL[3][1];e.textContent='peach';e.onclick=()=>{v[i]=(v[i]+1)%4;e.style.background=COL[v[i]][1];e.textContent=COL[v[i]][0];tone(300+v[i]*80)};w.appendChild(e)});b.appendChild(w);b.appendChild(mk('Open',()=>{if(v[0]==0&&v[1]==1&&v[2]==2){closePz();getPiece(3)}else{$('pm').textContent='Click. It stays shut. Try again.';tone(150,.2)}}))},['Look at the houses to the east.','Read the door colours from the east side, the right.','Pink, then mint, then blue.'])}
+function pzM(){let x=0,y=6;const cells=[],open=(a,c)=>a>=0&&c>=0&&a<7&&c<7&&MZ[c][a]!='#',dist={'3,3':0},q=[[3,3]],DR=[[1,0,'right'],[-1,0,'left'],[0,1,'down'],[0,-1,'up']];
+while(q.length){const p=q.shift();DR.forEach(d=>{const a=p[0]+d[0],c=p[1]+d[1];if(open(a,c)&&dist[a+','+c]===undefined){dist[a+','+c]=dist[p[0]+','+p[1]]+1;q.push([a,c])}})}
+function paint(){cells.forEach((el,k)=>{const i=k%7,j=k/7|0;el.style.background=i==x&&j==y?'#f48fb8':MZ[j][i]=='#'?'#6fc29a':MZ[j][i]=='G'?'#f2c94c':'#faf0e8'})}
+function mv(dx,dy){if(!open(x+dx,y+dy))return;x+=dx;y+=dy;paint();tone(260);if(MZ[y][x]=='G'){window.pzKey=null;setTimeout(()=>{closePz();getPiece(4)},400);return}
+const nb=DR.filter(d=>open(x+d[0],y+d[1]));if(nb.length>=3){const best=nb.reduce((a,d)=>dist[(x+d[0])+','+(y+d[1])]<dist[(x+a[0])+','+(y+a[1])]?d:a);$('pm').textContent=GN+': “Try '+best[2]+'!”'}}
+openPz('The Hedge Maze','Walk to the middle. There are only longer ways, never wrong ones.',b=>{const g=document.createElement('div');g.style.cssText='display:grid;grid-template-columns:repeat(7,28px);gap:2px;justify-content:center';for(let k=0;k<49;k++){const c=document.createElement('div');c.style.cssText='width:28px;height:28px';g.appendChild(c);cells.push(c)}b.appendChild(g);const pr=document.createElement('div');pr.className='pr';[['◀',-1,0],['▲',0,-1],['▼',0,1],['▶',1,0]].forEach(a=>pr.appendChild(mk(a[0],()=>mv(a[1],a[2]))));b.appendChild(pr);paint()},['There is one dead end. Nothing is lost if you reach it.','Head for the middle. Listen for the shouts at the forks.','Follow the shouts at every fork.']);
+window.pzKey=d=>mv(d[0],d[1])}
+function pzA(){let sel=-1,done=0;const ps={};
+openPz('The Torn Picture','Tap a piece, then tap where it belongs. The coloured edges match.',b=>{const g=document.createElement('div');g.className='spb';g.style.cssText+=';flex-wrap:wrap;width:180px;margin:0 auto';for(let i=0;i<4;i++){const e=document.createElement('button');e.className='sp2';e.style.cssText='width:84px;height:60px;border:6px solid '+COL[i][1]+';background:#faf0e8';e.onclick=()=>{if(sel<0)return;if(sel===i){e.style.background=COL[i][1];ps[sel].style.visibility='hidden';sel=-1;tone(660);if(++done==4)setTimeout(()=>{closePz();pzW()},600)}else{$('pm').textContent='That one doesn’t fit there.';tone(150,.2)}};g.appendChild(e)}b.appendChild(g);
+const pr=document.createElement('div');pr.className='pr';[2,0,3,1].forEach(k=>{const e=document.createElement('button');e.className='sp2';e.style.cssText='width:56px;height:44px;background:'+COL[k][1];e.onclick=()=>{sel=k;[...pr.children].forEach(c=>c.style.outline='');e.style.outline='4px solid #3b2a5a'};ps[k]=e;pr.appendChild(e)});b.appendChild(pr)},['Match the colour of the piece to the colour of the edge.','Pink, mint, blue and peach each have one place.','Try each piece in each spot, nothing is lost.'])}
+function pzW(){
+ const words=['Music','Songs','Band','Guitar','Dance','Party'];
+ const art=document.createElement('canvas');art.width=art.height=150;art.style.cssText='image-rendering:pixelated;width:210px;height:210px;border:4px solid #3b2a5a';
+ const a=art.getContext('2d'),rr=(x,y,w,h,c)=>{a.fillStyle=c;a.fillRect(x,y,w,h)};
+ rr(0,0,150,150,'#2a2342');rr(62,48,26,52,'#f2c94c');rr(66,54,18,40,'#fff3a8');rr(58,40,34,8,'#c9955f');rr(70,30,10,10,'#c9955f');rr(58,100,34,8,'#c9955f');a.strokeStyle='#f2c94c';a.lineWidth=2;[[18,18],[124,22],[12,76],[130,80],[28,122],[116,124]].forEach(s=>a.strokeRect(s[0],s[1],10,10));
+ const wrap=document.createElement('div');wrap.style.cssText='position:relative;width:210px;margin:0 auto';wrap.appendChild(art);
+ let sel=-1;const used=[];
+ const angs=[0,60,120,180,240,300];
+ angs.forEach((ang,i)=>{const cx=75+Math.cos(ang*Math.PI/180)*40,cy=74+Math.sin(ang*Math.PI/180)*40,s=document.createElement('div');s.style.cssText='position:absolute;left:'+(cx*1.4-13)+'px;top:'+(cy*1.4-13)+'px;width:26px;height:26px;border:3px solid #f2c94c;border-radius:50%;background:#f4a6c0';s.onclick=()=>{if(sel<0||used[i])return;used[i]=1;s.style.background='#f2c94c';tone(660);if(used.filter(Boolean).length===words.length)setTimeout(()=>{closePz();picDone()},400)};wrap.appendChild(s)});
+ const wrow=document.createElement('div');wrow.className='spb';wrow.style.cssText+=';flex-wrap:wrap;width:210px;margin:0 auto';
+ words.forEach((w,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent=w;e.onclick=()=>{sel=sel===i?-1:i;[...wrow.children].forEach((c,k)=>c.style.outline=sel===k?'4px solid #3b2a5a':'')};wrow.appendChild(e)});
+ openPz('Word Match','Tap a word, then tap a star around the lantern to pair them.',b=>{b.appendChild(wrap);b.appendChild(wrow)},['Pick a word, then tap a star around the lantern.','The lantern is whole once every star is paired.','Try a word on any star — nothing is lost.'])
+}
+function picDone(){F.key=1;save();hud();reward();say([[CH.name,LN[CH.id][3]],[GN,'Six! That’s a lot of stars to find.'],['','A brass key slides out from behind the frame.'],['The Keeper','Well done. One lantern, six stars. The key opens the flower gate.']])}
+
+function pzG(){const seq=[0,2,1],btn=[];let inp=[],busy=1;
+openPz('The Garden Flowers','Watch the flowers, then tap them in the same order.',b=>{const w=document.createElement('div');w.className='spb';['Left','Right','Middle'].forEach((n,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent=n;e.onclick=()=>click(i);btn.push(e);w.appendChild(e)});b.appendChild(w)},['Watch the flowers.','The three flowers bloom in order.','Left, right, then the middle one.']);
+function flash(i){btn[i].classList.add('on');tone(330+i*110);setTimeout(()=>btn[i].classList.remove('on'),200)}
+function play(){busy=1;inp=[];const s2=seq.concat(seq);s2.forEach((s,k)=>setTimeout(()=>flash(s,350),500+k*700));setTimeout(()=>busy=0,1000+s2.length*700)}
+function click(i){if(busy)return;flash(i);inp.push(i);const k=inp.length-1;if(inp[k]!==seq[k]){$('pm').textContent='Not quite. Watch again!';busy=1;setTimeout(play,900)}else if(inp.length===seq.length){busy=1;setTimeout(()=>{closePz();F.g1=1;save();hud();reward();say([['', 'The garden turns a shade greener. Colour spreads beyond the town.']])},500)}}
+play()
+}
+function pzBT(){const trail=[[21,7],[22,8],[23,9]];let i=0;
+openPz('The Butterfly Trail','Tap the butterflies along the trail in order. The key is at the end.',b=>{trail.forEach((p,k)=>{const e=document.createElement('button');e.className='sp2';e.textContent='B'+(k+1);e.style.cssText='width:56px;height:44px;background:#ffd166;border-color:#f2c94c';e.onclick=()=>{if(i!==k)return;tone(660);e.style.background='#f2c94c';if(++i===trail.length)setTimeout(()=>{F.gkey=1;save()},300)};b.appendChild(e)})},['Tap them one by one.','Try each butterfly in turn.']);
+}
+function showPhoto(src,t){reveal();$('end').classList.add('hide');openPz(t,'',b=>{const im=document.createElement('img');im.src=src;im.alt='Photo';im.style.cssText='max-height:56vh;max-width:100%';b.appendChild(im)},['Tap outside to return to the town.']);$('ph').style.display='none';$('px').onclick=()=>{$('pz').classList.add('hide');$('ph').style.display='';$('end').classList.remove('hide');mode='end'}}
+
+function pzOrd(){
+ const items=['Vanilla ice cream','A sprinkle of lavender','One spoonful of cream'];let inp=[];
+ openPz('The Forgotten Order','Mireille wrote the order down: "One vanilla ice cream with a sprinkle of lavender, please." Tap the buttons in the right order.',b=>{
+  const g=document.createElement('div');g.className='spb';
+  items.forEach((t,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent=t;e.onclick=()=>{if(inp.indexOf(i)>=0)return;inp.push(i);e.style.background='#2e3f63';tone(520);if(inp.length===items.length)setTimeout(()=>{closePz();F.c3a=1;setTimeout(cafeDone,400)},400)};g.appendChild(e)});b.appendChild(g)
+ },['Was it the ice cream or the lavender first?','The vanilla ice cream goes first, I think.','Tap each item, nothing is lost.']);
+}
+function pzSecTable(){
+ openPz('The Secret Table','Look closely at the table — there’s a lever under the menu!',b=>{b.appendChild(mk('Pull the lever',()=>{if(F.c3b)return;F.c3b=1;save();hud();say([['', 'The drawer opens with a little chime. Inside: a tiny bottle of vanilla extract — Mireille keeps her vanilla beans here, her favourite is so simple.']]);setTimeout(cafeDone,400)}))},['The drawer is sealed, but there’s a little wax.']);
+}
+function pzConv(){
+  const conv=[['Mireille','Vanilla ice cream is what Missy asks for, isn’t it? A spoonful of cream and the colour comes back.'],['Visitor','I never knew it looked so soft.'],['Mireille','A little vanilla, sweet and slow — some memories melt like ice cream.']];let i=0;
+  openPz('A Quiet Conversation','Tap the conversation — it’s short.',b=>{
+   b.appendChild(mk('Tap to listen',()=>{if(i>=conv.length)return;const l=conv[i++];say([[l[0],l[1]]]);if(i===conv.length)setTimeout(()=>{F.c3c=1;setTimeout(cafeDone,400)},800)}))
+  },['There’s nothing left to say — just listen.']);
+}
+function knifeTut(){
+ say([
+  [CD.name,'I wasn’t very happy when you got hurt that time, when the knife cut your feet.'],
+  ['', 'Here is a tutorial on how to hold a knife. I know you know how to hold a knife but...'],
+  [CD.name,'...the kindest thing I can say is: keep the tip up, and let the forearm lead the motion.'],
+  ['', 'Curl your fingers under the handle and let your thumb wrap over the back — a grip nothing can slip from.'],
+  ['', 'Point the tip toward the ceiling, so if it moves it goes up rather than down.'],
+  ['', 'Pause for a breath before each cut; a calm hand is a careful hand.'],
+  [CD.name,'Take your time, dear. I’m glad you’re here, and I want you to stay safe — my café feels warmer when everyone is.']
+ ],()=>{F.knifeTut=1;save()});
+}
+function cafeDone(){if(!F.cafe&&F.c3a&&F.c3b&&F.c3c){F.cafe=1;save();hud();reward();if(!F.ch3){F.ch3=1;chCard(3)}say([['', 'The café feels a little brighter now. The waitress says the town is quieter today.']]);setTimeout(vanillaFacts,500)}}
+function vanillaFacts(){
+ say([
+  [CD.name,'SINCE, VANILLA IS YOUR FAVOURITE FLAVOUR I THOUGHT , WHY NOT ADD THIS TO THE REWARD POOL ?'],
+  ['', 'Did you know?'],
+  ['', 'Vanilla comes from a climbing orchid native to Mexico — the ancient Taino people mixed it into their chocolate drink, and the Spanish explorer Hernan Cortes took the idea back to Europe, where vanilla became a precious spice, once worth more than gold when hand pollination was the only way to grow it.'],
+  ['', 'Fun facts: vanilla is the only fruit that comes from an orchid; each bean needs 6–8 months of growing, curing and drying to be ready; the word “vanilla” comes from the Spanish “vainilla”, a little pod; there are over 2,000 kinds of vanilla beans.'],
+  ['', 'Make your own easy vanilla ice cream at home: whisk ½ cup cold milk with 1 cup heavy cream, 3 tbsp sugar and 1 tsp vanilla extract in a bowl. Pour into a tray, freeze 30 minutes, scrape with a fork, freeze another 30 minutes and scrape again — keep going until smooth. Serve with a spoon and a smile.']
+ ]);
+}
+
+function pzConst(){
+ const stars=['Alpha','Beta','Gamma','Delta'];let inp=[];
+ openPz('The Constellation','Tap the stars in the order the constellation flows.',b=>{
+  const w=document.createElement('div');w.className='spb';
+  stars.forEach((n,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent=n;e.onclick=()=>{inp.push(i);e.style.background='#2e3f63';tone(520);if(inp.length===stars.length)setTimeout(()=>{closePz();F.c4a=1;setTimeout(bridgeDone,400)},400)};w.appendChild(e)});b.appendChild(w)
+ },['Watch the stars come out.','The constellation has four stars.','Try each star in turn.']);
+}
+function pzRiver(){
+ const stones=[0,1,2];let inp=[];
+ openPz('River Crossing','Step the stones across the river in order.',b=>{
+  const w=document.createElement('div');w.className='spb';
+  stones.forEach((n,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent='Stone '+(i+1);e.onclick=()=>{inp.push(i);e.style.background='#2e3f63';tone(520);if(inp.length===stones.length)setTimeout(()=>{closePz();F.c4b=1;setTimeout(bridgeDone,400)},400)};w.appendChild(e)});b.appendChild(w)
+ },['Cross carefully, one stone at a time.','Look for the dry path across the river.']);
+}
+function pzLights(){
+ const seq=[0,1,2],btn=[];let inp=[],busy=1;
+ openPz('The Light Sequence','Tap the lights in the same order they glow.',b=>{const w=document.createElement('div');w.className='spb';['First','Second','Third'].forEach((n,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent=n;e.onclick=()=>click(i);btn.push(e);w.appendChild(e)});b.appendChild(w)},['Watch the lights.','The sequence glows three times.','Tap each light in the same order.']);
+ function flash(i){btn[i].classList.add('on');tone(540);setTimeout(()=>btn[i].classList.remove('on'),200)}
+ function play(){busy=1;inp=[];const s2=seq.concat(seq);s2.forEach((s,k)=>setTimeout(()=>flash(s,350),500+k*700));setTimeout(()=>busy=0,1000+s2.length*700)}
+ function click(i){if(busy)return;flash(i);inp.push(i);const k=inp.length-1;if(inp[k]!==seq[k]){$('pm').textContent='Not quite. Watch again!';busy=1;setTimeout(play,900)}else if(inp.length===seq.length){busy=1;setTimeout(()=>{closePz();F.c4c=1;setTimeout(bridgeDone,400)},500)}}
+ play()
+}
+function bridgeDone(){if(F.bridge)return;F.bridge=1;save();hud();reward();if(!F.ch4){F.ch4=1;chCard(4)}showPhoto('assets/photos/graded.jpg','Graded');setTimeout(()=>showPhoto('assets/photos/kaka-with-a-rose.jpg','A Rose'),900)}
+
+function pzMemArchive(){
+ const mems=['First','Second','Third','Fourth'];let inp=[];
+ openPz('The Memory Archive','Tap the memory fragments in the order of the Memory Castle.',b=>{
+  const w=document.createElement('div');w.className='spb';
+  mems.forEach((n,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent=n;e.onclick=()=>{inp.push(i);e.style.background='#2e3f63';tone(520);if(inp.length===mems.length)setTimeout(()=>{closePz();F.c5a=1;setTimeout(ch5Step,400)},400)};w.appendChild(e)});b.appendChild(w)
+ },['The fragments are stored in the archive.','Touch the memory stones in order.']);
+}
+function ch5Step(){
+ if(!F.c5b)say([['Grandfather','Now the library is locked. Let us find someone who can set it right.']],pzLibLock);
+ else if(!F.c5c)say([['Grandfather','The archive leads to the final door. Someone must open it.']],pzFinalDoor);
+}
+function pzLibLock(){
+ const v=[3,3,3];
+ openPz('The Locked Library','Set the dials to match the days of memory.',b=>{
+  const w=document.createElement('div');w.className='dgs';v.forEach((_,i)=>{const e=document.createElement('button');e.className='sp2';e.style.background=COL[3][1];e.textContent='peach';e.onclick=()=>{v[i]=(v[i]+1)%4;e.style.background=COL[v[i]][1];e.textContent=COL[v[i]][0];tone(300+v[i]*80)};w.appendChild(e)});b.appendChild(w);b.appendChild(mk('Open',()=>{if(v[0]==0&&v[1]==1&&v[2]==2){closePz();F.c5b=1;setTimeout(ch5Step,400)}else{$('pm').textContent='Click. It stays shut. Try again.';tone(150,.2)}}))
+ },['Look at the bookshelves in the corner.','The days of memory read as Pink, then Mint, then Blue.','Set them as they are.'])
+}
+function pzFinalDoor(){
+ openPz('The Final Door','The door remembers only the heart that opened it.',b=>{
+  b.appendChild(mk('Open the door',()=>{F.c5c=1;closePz();setTimeout(ch5Done,400)}))
+ },['Nothing moves until the room is quiet.','Stand where the light reaches the stone.']);
+}
+function ch5Done(){
+  if(F.ch5)return;F.ch5=1;save();hud();reward();
+  chCard(5);
+  say([["Grandmother","The Memory Castle welcomed them. It is time for us to rest in the archives."],["Grandfather","I remember now."]],()=>{setTimeout(showProgram,500);setTimeout(()=>showPhoto('assets/photos/note.jpg','Note'),1500)});
+}
+
+function shake(el){if(!el||!el.animate)return;el.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(-3px)'},{transform:'translateX(3px)'},{transform:'translateX(-2px)'},{transform:'translateX(0)'}],{duration:160,easing:'ease-out'})}
+function chCard(n){
+ if($('end').dataset.xc)return;
+ $('end').dataset.xc=1;mode='end';shake($('gw'));reveal();
+ const h2=$('end').querySelector('h2');h2.textContent='Chapter '+n+' complete!';
+ const ct={2:'The garden is open — the flowers await you.',3:'The Little Café is bright — Mireille is making a vanilla ice cream.',4:'The Bridge of Stars stands ahead.',5:'The Memory Castle opens — the memories return.'};
+ $('eh').textContent=ct[n]||'';
+ $('end').classList.remove('hide');
+}
+function showCredits(){$('credits').classList.remove('hide')}
+const LET2="Dear you,\n\nYou made it to the garden. I hoped you would.\n\nThis is where the colour starts to come back, so I tried to make it a gentle place. Just flowers and a few butterflies, nothing too hard. I didn't want you to feel rushed.\n\nI am looking at a photo of you as I write this letter. I look at it a lot and it makes me smile every time. There's a dandelion as well. Make a wish on it if you like. I won't ask what it was.\n\nI hope you're doing okay today. I think about you more than I say.\n\nOkay, go and find the next bit. Bye for now.\n\nKobby";
+const LETA=[LET1,LET2];
+function showLetters(){const ld=$('ld');ld.innerHTML='';LETA.forEach(t=>{const e=document.createElement('div');e.style.cssText='max-height:52vh;overflow:auto;text-align:left;font-size:16px;line-height:1.35;margin:6px 0;border:2px solid var(--line);padding:8px';e.textContent=t;ld.appendChild(e)});$('letters').classList.remove('hide')}
+function hideLetters(){$('letters').classList.add('hide')}
+function themeToggle(){
+ const el=document.documentElement;
+ const cur=el.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+ const next=cur==='light'?'dark':'light';
+ el.dataset.theme=next;
+ $('thm').textContent=next==='light'?'☀ Light':'🌙 Dark';
+ try{localStorage.setItem('lip_theme',next)}catch(e){}
+}
+try{const t=localStorage.getItem('lip_theme');if(t&&['dark','light'].includes(t))document.documentElement.dataset.theme=t}catch(e){}
+function pzQA(){
+ const QAS=[
+  {q:'Who sang Unethical?',a:['Faouzia']},
+  {q:'Who and who sang Raindance?',a:['Tems','Dave']},
+  {lyrics:1},
+  {q:'Who sang Papoutai?',a:['Stromae']},
+  {q:'Capital of France?',a:['Paris']},
+  {q:'Capital of Canada?',a:['Ottawa']},
+  {q:'Capital of Australia?',a:['Canberra']}
+ ];
+ let i=0;
+ const b=document.getElementById('pb');
+ openPz('Questions for Mireille','Answer with her — some answers are taps on words.',()=>{},['']);
+ const next=()=>{
+  if(i>=QAS.length){F.c6qa=1;save();setTimeout(ch6Step,400);return}
+  const q=QAS[i++];
+  if(q.lyrics){showLyrics(()=>next());return}
+  const w=document.createElement('div');w.className='spb';
+  const e=document.createElement('button');e.className='sm';e.textContent=q.q;
+  e.onclick=()=>{tone(520);say([['Mireille',q.a.join(' and ')]],()=>{const r=mk('That’s right — she told me.',next);b.appendChild(r)})};
+  w.appendChild(e);b.appendChild(w)
+ };
+ next()
+}
+function showLyrics(next){
+ const b=$('pb');b.innerHTML='';
+ const correct=['my mind','in my heart i know',"i'm all you need",'i love you'];
+ const w=document.createElement('div');w.style.cssText='display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:220px';
+ const slots=[];
+ for(let k=0;k<4;k++){const s=document.createElement('button');s.className='sp2';s.style.cssText+=';width:90px;height:44px;border-style:dashed';s.textContent='____';w.appendChild(s);slots.push(s)}
+ b.appendChild(w);
+ const row=document.createElement('div');row.className='spb';
+ correct.forEach(txt=>{
+  const e=document.createElement('button');e.className='sp2';e.textContent=txt;
+  e.onclick=()=>{const k=slots.findIndex(s=>s.textContent==='____');if(k<0)return;slots[k].style.background='#2e3f63';slots[k].textContent=txt;tone(660);if(k===3)setTimeout(()=>{F.c6qa=1;save();next()},400)};
+  row.appendChild(e)
+ });b.appendChild(row)
+}
+function pzFinale(){
+ const lt=[0,1,2,3],lit=[];
+ openPz('The Lantern of the Place','Light the stars of the Place of a Thousand Stars.',b=>{
+  const w=document.createElement('div');w.className='spb';
+  lt.forEach((n,i)=>{const e=document.createElement('button');e.className='sp2';e.textContent='Star '+(i+1);e.onclick=()=>{if(lit.indexOf(i)>=0)return;e.style.background='#f2c94c';e.style.color='#f2c94c';tone(540);lit.push(i);if(lit.length===4)setTimeout(()=>{closePz();F.c6fin=1;setTimeout(ch6Done,400)},400)};w.appendChild(e)});b.appendChild(w)
+ },['Watch the lantern glow as you light the stars, one by one.','All four stars must be lit.','The colour comes back with each one.']);
+}
+function ch6Step(){say([['Mireille','The lantern is lit. Now the Place of a Thousand Stars is ready.']],pzFinale)}
+function ch6Done(){
+ if(F.ch6)return;F.ch6=1;save();hud();reward();
+ say([["Mireille","The stars are lit. And the heart — the heart gives the name. It has been ours all along."],["Missy","Look in the mirror."]],()=>setTimeout(showMirror,400));
+}
+function showMirror(){
+ $('end').classList.add('hide');
+ const b=$('pb');b.innerHTML='';
+ const wrap=document.createElement('div');wrap.style.cssText='position:relative;width:210px;margin:0 auto';
+ const vid=document.createElement('video');vid.muted=true;vid.playsInline=true;vid.style.cssText='width:210px;height:210px;border:4px solid #3b2a5a;background:#f2c94c';
+ const img=document.createElement('img');img.src='assets/photos/you.jpg';img.alt='You';img.style.cssText='width:210px;height:210px;border:4px solid #3b2a5a;object-fit:cover';
+ wrap.append(vid,img);b.appendChild(wrap);
+ const note=document.createElement('p');note.style.cssText='font:12px "Press Start 2P",monospace;margin:4px 0 0;color:#3b2a5a';note.textContent='Your face stays on your device.';b.appendChild(note);
+ try{navigator.mediaDevices&&navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(s=>{img.style.display='none';vid.srcObject=s;vid.play()},()=>{})}catch(e){}
+ $('pt').textContent='The Mirror';$('pd').textContent='Your face, as in a true mirror — The best gift is you, yourself, Missy.';
+ $('ph').style.display='none';
+ $('px').onclick=()=>{$('pz').classList.add('hide');$('end').classList.remove('hide');mode='end';setTimeout(addExitButton,300)};
+ $('pz').classList.remove('hide');mode='puz';
+}
+function addExitButton(){
+ const pr=$('end').querySelector('.pr');
+ if(pr.dataset.xit)return;pr.dataset.xit=1;
+ const m=document.createElement('p');m.id='em2';m.style.cssText='margin:8px 0 0;font:18px "Press Start 2P",monospace;color:#3b2a5a;text-align:center';m.textContent='I HOPE YOU LIKED ITTTTTTTTT , BYEEEE';
+ $('end').querySelector('.box').appendChild(m);
+ pr.prepend(mk('Press to exit',runConfetti));
+}
+function runConfetti(){
+ const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;z-index:21;pointer-events:none';
+ document.body.appendChild(c);const g=c.getContext('2d');c.width=window.innerWidth;c.height=window.innerHeight;
+ const cols=['#f4a6c0','#f2c94c','#c9b6f2','#bfe8d2','#ffc48a'];
+ const parts=[];for(let i=0;i<40;i++)parts.push({x:Math.random()*c.width,y:Math.random()*c.height-40,vx:(Math.random()-.5)*4,vy:5+Math.random()*8,s:2+Math.random()*5,a:Math.random()*6.28});
+ const t0=performance.now();
+ const tick=()=>{const dt=(performance.now()-t0)/1000;g.clearRect(0,0,c.width,c.height);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy+110*dt;g.save();g.translate(p.x,p.y);g.rotate(p.a);g.fillStyle=cols[Math.floor(Math.random()*cols.length)];g.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);g.restore()});if(dt>2)setTimeout(()=>c.remove(),400);else setTimeout(tick,60)};tick()
+}
+function showProgram(){
+ $('end').classList.add('hide');
+ const b=$('pb');b.innerHTML='';
+ const pre=document.createElement('pre');pre.id='prog';
+ pre.style.cssText='max-height:60vh;overflow:auto;text-align:left;font:13px/1.5 monospace;white-space:pre-wrap;margin:0;cursor:pointer';
+ const run=()=>{
+  const lines=[
+   'Missy.cpp — the gift program',
+   '// A gift program for Missy — the explorer. (Auto-run; no input required.)',
+   '',
+   '> Missy',
+   '> yes, yes',
+   '',
+   '  --- Missy.cpp ---',
+   '',
+   '  Misswell',
+   '',
+   '  The best gift is you, yourself, Missy.',
+   '  You brought the world back to life, and it is yours.',
+   '',
+   '  **  **  **  **  **  **',
+   '  **  **  **  **  **  **',
+   '',
+   '  ( Program complete. )'
+  ];
+  let i=0;
+  pre.textContent='';
+  const tick=()=>{if(i>=lines.length)return;const l=lines[i++];pre.textContent+=l+'\n';tone(520);setTimeout(tick,150)};tick()
+ };
+ run();pre.onclick=run;b.appendChild(pre);
+ $('pt').textContent='Missy.cpp';$('pd').textContent='Tap the program to run it again.';
+ $('ph').style.display='none';
+ $('px').onclick=()=>{$('pz').classList.add('hide');$('end').classList.remove('hide');mode='end'};
+ $('pz').classList.remove('hide');mode='puz';
+}
+function act(o){const id=CH.id;switch(o.id){
+case 'adjoa':if(!F.adjoa){F.adjoa=1;save();say([[AN,'Welcome, dear. Half my shelves are empty, and I can’t name what’s left. I know I own a piece of that picture. I just can’t see it without my glasses.'],[AN,'Where did you last have them?'],[AN,'Somewhere pretty. Somewhere with flowers.'],[CH.name,LN[id][1]]])}
+else if(F.p2)say([[AN,'Thank you again, dear. Mind how you go.']]);else if(F.glasses)say([[AN,'My glasses! Oh, look at that picture. Take this piece, it’s been in the till for years.']],()=>getPiece(2));else say([[AN,'Somewhere with flowers, dear. Look low.']]);break;
+case 'gospel':if(!F.met){F.met=1;save();hud();say([[GN,'Hey! You’re new. Or you’re old and I forgot you. Everything went grey last night.'],[CH.name,LN[id][0]],[GN,'The Hush. Mrs. Adjoa says it eats whatever people stop remembering. I found this by the fountain.'],[GN,'Four pieces are missing, and I can’t see over the hedges. Can you find them?']])}
+else if(F.key)say([[GN,'The key opens the flower gate!']]);else if(pcs()==4)say([[GN,'That’s all four! Let’s put it together.']],pzA);else say([[GN,'Four pieces, remember. You have '+pcs()+' so far.']]);break;
+case 'fountain':if(!F.met)say([['The Keeper',NOTE]]);else if(F.p1)say([['','The fountain hums happily.']]);else say([[GN,'The water’s jumping! Left, right, then the middle one. Did you see?']],pzF);break;
+case 'chest':if(F.p3)say([['','The chest is empty now.']]);else say([['','Carved on the lid: “The doors know the way. Read them from the sunrise side.”']],pzC);break;
+case 'maze':if(F.p4)say([['','The maze is quiet now.']]);else say([[GN,'I’ll wait at the entrance and shout if you go wrong. Left! No, your other left!']],pzM);break;
+case 'h0':case 'h1':case 'h2':say([['','A little house with a '+o.d+' door.']]);break;
+case 'b0':case 'b1':case 'b2':if(o.id=='b1'&&F.adjoa&&!F.glasses){F.glasses=1;save();burst(o.x*TS+8,o.y*TS+4,'#f2c94c');sfx([784,988]);say([['','You found Mrs. Adjoa’s glasses!']])}else say([['','Just flowers here.']]);break;
+case 'gate':if(!F.key)say([['','The gate sleeps until the picture is whole.']]);else{F.gate=1;F.kofiShow=1;save();hud();burst(o.x*TS+8,o.y*TS+16,'#f4a6c0',24);sfx([523,659,784,1047]);say([['','The key turns, and colour floods back.'],['','A hooded figure stands at the end of the path.'],['Kofi','The Keeper says to be careful of the butterflies.'],[CH.name,LN[id][4]],['','He is gone. The path to the Garden of Beginnings is open.']],()=>{F.kofiShow=0;finish()})}break;case 'garden_flowers':if(F.g1)say([['','The garden flowers hum in colour.']]);else say([[GN,'The flowers are all facing the sun. Watch the pattern.']],pzG);break;case 'butterflies':if(F.gkey)say([['','The butterflies have rested at the trail’s end.']]);else say([[GN,'Look! They follow a trail. Tap to follow them.']],pzBT);break;case 'garden_key':if(!F.gkey)say([['','Nothing here yet. Follow the butterflies.']]);else if(!F.garden){F.garden=1;save();hud();reward();if(!F.ch2){F.ch2=1;chCard(2)}say([['', 'A small key is hidden in the garden flowers. The colour spreads beyond the town.']],()=>setTimeout(()=>{showPhoto('assets/photos/you.jpg','You');showPhoto('assets/photos/dandelion-extract.jpg','Dandelion Extract');setTimeout(knifeTut,900)},800))}else say([['','The key fits nothing you know of yet.']]);break;case 'cafe':if(!F.cafewelcome){F.cafewelcome=1;save();say([['', 'Welcome to the Little Café — Mireille is making a vanilla ice cream. The waitress will tell you about the day.']])}else if(!F.c3a)pzOrd();else say([['', 'The counter is clear now.']]);break;case 'table':if(!F.c3b)pzSecTable();else say([['', 'The drawer is empty now.']]);break;case 'cafenpc':if(F.cafe){if(!F.c3w){F.c3w=1;save();showRew('Be Happy',x=>{const v=document.createElement('video');v.src='assets/music/be-happy.mp4';v.controls=true;v.playsInline=true;v.style.cssText='max-height:48vh;max-width:100%';const m=document.createElement('p');v.onerror=()=>{m.textContent='The video file is not available in this copy.'};x.append(v,m)})}else say([[CD.name,'A lovely day, isn’t it?']])}else if(!F.c3c)pzConv();else say([[CD.name,'Hello!']]);break;case 'bridge':if(F.bridge)say([['', 'The Bridge of Stars is quiet now.']]);else say([['', 'A bridge over the river, lit by stars.']],pzConst);break;case 'river':if(F.c4b)say([['', 'The river is crossed.']]);else say([['', 'Step stones across the river.']],pzRiver);break;case 'lights':if(F.c4c)say([['', 'The lights have rested.']]);else say([['', 'Tap the lights in their sequence.']],pzLights);break;case 'gm':if(!F.gm){F.gm=1;save();say([['Grandmother','Help, please. We lost our way and our memories. The Memory Castle is to the east — will you find the way with us?']])}else say([['Grandmother','Whenever you are ready, we will walk to the castle.']]);break;case 'gf':if(!F.gf){F.gf=1;save();say([['Grandfather','The castle is east of us. If the archive holds their memories, they may return.']])}else say([['Grandfather','Memory returns where a heart opens the door.']]);break;case 'archive':if(!F.c5a)pzMemArchive();else say([['', 'The archive is empty now.']]);break;case 'library':if(!F.c5b)pzLibLock();else say([['', 'The library is quiet now.']]);break;case 'finaldoor':if(!F.c5c)pzFinalDoor();else ch5Done();break;case 'lantern':if(F.ch6)say([['', 'The lantern is lit — the stars gather above us.']]);else say([['', 'A lantern with six empty stars stands here. Who could light it?']],pzQA);break;case 'secretjar':if(F.sec){say([['', 'The jar is empty now.']])}else{F.sec=1;save();burst(o.x*TS+8,o.y*TS+6,'#ffd166',8);say([['', 'A hidden jar! It looks like it holds something sweet — keep it for later.']],()=>{reward()})}break}}
+function showRew(t,f){reveal();$('end').classList.add('hide');openPz(t,'',f,['']);$('ph').style.display='none';$('px').onclick=()=>{const v=$('pb').querySelector('video');v&&v.pause();$('pz').classList.add('hide');$('ph').style.display='';$('end').classList.remove('hide');mode='end'}}
+function finish(){mode='end';$('eh').textContent=hearts()+' of 3 golden hearts found';const pr=$('end').querySelector('.pr');
+if(!pr.dataset.x){pr.dataset.x=1;pr.prepend(mk('Read Letter 1',()=>showRew('A Letter from Kobby',x=>{const d=document.createElement('div');d.style.cssText='white-space:pre-wrap;text-align:left;max-height:56vh;overflow:auto;font-size:17px';d.textContent=LET1+'\n\nKobby ♥';x.appendChild(d)})),mk('Click to watch this video',()=>showRew('mmmm mmmm',x=>{const v=document.createElement('video');v.src='assets/videos/mmmm-mmmm.mp4';v.controls=true;v.playsInline=true;v.style.cssText='max-height:48vh;max-width:100%';const m=document.createElement('p');v.onerror=()=>{m.textContent='The video file is not available in this copy.'};x.append(v,m)})))}
+$('end').classList.remove('hide');sfx([523,659,784,1047])}
+addEventListener('keydown',e=>{const d={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0]}[e.key.toLowerCase()];if(d&&mode==='puz'&&window.pzKey){e.preventDefault();window.pzKey(d)}});
+function press(){if(!window.gameOn)return;if(!window.mIntro){window.mIntro=1;startMusic()}if(mode==='dlg')nx();else if(mode==='play'){const o=near();if(o)act(o)}}
+function startMusic(){const v=document.createElement('video');v.src='assets/music/be-happy.mp4';v.autoplay=true;v.loop=true;v.playsInline=true;v.muted=mute;v.style.cssText='position:fixed;right:10px;bottom:10px;z-index:10;height:80px';document.body.appendChild(v)}
+function start(){CH=CHARS[cur];GN=CH.id=='gospel'?'Bea':'Gospel';OB.find(o=>o.id=='gospel').ch=CH.id=='gospel'?{...CHARS.find(c=>c.id=='angel'),top:'#ffd6a5'}:CHARS.find(c=>c.id=='gospel');F=load();F.kofiShow=0;P={x:104,y:92,vx:0,vy:0,mv:0};PT=[];window.gameOn=true;$('welcome').classList.add('hide');document.querySelector('.app').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('game').classList.remove('hide');hud();mode='play';
+if(!F.intro){F.intro=1;save();say([['','The square is bright, but its edges are grey. A note is pinned to the fountain.'],['The Keeper',NOTE],['','Move with the pad or arrow keys. Press A or Space to interact.']])}
+if(!raf){last=performance.now();raf=requestAnimationFrame(loop)}}
+function leave(){window.gameOn=false;mode='menu';$('game').classList.add('hide');document.querySelector('.app').classList.remove('hide')}
+$('mAdv').onclick=start;$('mn').onclick=leave;$('em').onclick=leave;$('ea').onclick=()=>{try{localStorage.removeItem('lip_save')}catch(e){}start()};
+$('ps').onclick=()=>{pau^=1;$('ps').textContent=pau?'▶':'⏸'};
+$('thm').onclick=themeToggle;
+$('creditsBtn').onclick=showCredits;
+$('cr').onclick=()=>$('credits').classList.add('hide');
+$('mu').onclick=()=>{mute=!mute;$('mu').textContent=mute?'✕':'♪'};
+// ---- Settings ----
+let sfxVolume=1,reducedAnimations=false;
+$('sx').onclick=()=>$('settings').classList.add('hide');
+function loadSettings(){
+  try{
+    const s=localStorage.getItem('lip_settings');
+    if(s){const o=JSON.parse(s);if(o.sfxVolume!=null)sfxVolume=o.sfxVolume;if(o.reducedAnimations!=null)reducedAnimations=o.reducedAnimations;}
+  }catch(e){}
+  $('smv').value=Math.round(sfxVolume*100);$('sfxv').value=Math.round(sfxVolume*100);$('redA').checked=reducedAnimations;
+}
+function saveSettings(){
+  try{localStorage.setItem('lip_settings',JSON.stringify({sfxVolume:sfxVolume,reducedAnimations:reducedAnimations}))}catch(e){}
+}
+$('smv').oninput=(e)=>{sfxVolume=+$('smv').value/100;if(document.querySelector('video'))document.querySelector('video').volume=sfxVolume;saveSettings()};
+$('sfxv').oninput=(e)=>{sfxVolume=+$('sfxv').value/100;saveSettings()};
+$('redA').onchange=(e)=>{reducedAnimations=$('redA').checked;saveSettings()};
+if(reducedAnimations){document.querySelectorAll('.sp2').forEach(el=>el.style.transition='none')}
+
+// ---- Inventory ----
+function updateInv(){
+  const id=$('invd');id.innerHTML='';
+  const items=[
+    {k:'\u2665',n:'Golden hearts',d:'Earned through puzzles and exploration. 3 max per chapter.'},
+    {k:'\u2702',n:'Picture pieces',d:'Pieces of the torn picture. 4 total.'},
+    {k:'\u2691',n:'Brass key',d:'Opens the flower gate to the Garden.'},
+    {k:'\u2709',n:'Letters',d:'Kobby\'s letters. View them in the Letters screen.'},
+    {k:'\u25fc\u25fc',n:'Photos',d:'Personal photographs. View them in the Letters screen.'},
+    {k:'\ud83c\udf8e',n:'Collectibles',d:'Secret jars and other hidden items.'}
+  ];
+  items.forEach(it=>{
+    const div=document.createElement('div');div.style.cssText='display:flex;gap:10px;align-items:center;padding:6px 8px';
+    div.innerHTML='<span style="font-size:24px">'+it.k+'</span><div><div><div style="font-size:14px;font-weight:bold">'+it.n+'</div><div style="font-size:12px;color:#6a5a8a">'+it.d+'</div></div></div>';
+    id.appendChild(div);
+  });
+}
+function showInv(){mode='inv';$('inv').classList.remove('hide');$('jrn').classList.add('hide');$('letters').classList.add('hide');$('letter').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('welcome').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');$('hud').classList.remove('hide');hud();updateInv();$('inv').classList.add('show')}
+function hideInv(){mode='menu';$('inv').classList.remove('show');$('inv').classList.add('hide')}
+$('invBtn').onclick=()=>{showInv();$('inv').classList.remove('hide')}
+$('ix').onclick=()=>hideInv()
+
+// ---- Journal ----
+function updateJrn(){
+  const id=$('jrd');id.innerHTML='';
+  const entries=[
+    {t:'Chapter 1',d:'The Little Town',p:'Tutorial, brass key, flower gate'},
+    {t:'Chapter 2',d:'Garden of Beginnings',p:'Garden open, photo revealed'},
+    {t:'Chapter 3',d:'Little Café',p:'Vanilla ice cream, Mireille'},
+    {t:'Chapter 4',d:'Bridge of Stars',p:'Night becomes hopeful'},
+    {t:'Chapter 5',d:'Memory Castle',p:'Memories return'},
+    {t:'Chapter 6',d:'Place of a Thousand Stars',p:'The lantern is lit'}
+  ];
+  entries.forEach(e=>{
+    const div=document.createElement('div');div.style.cssText='padding:6px 8px;border-bottom:1px solid var(--line)';
+    div.innerHTML='<b>'+e.t+'</b>: '+e.d+'<br><span style="font-size:12px;color:#6a5a8a">'+e.p+'</span>';
+    id.appendChild(div);
+  });
+}
+function showJrn(){mode='jrn';$('jrn').classList.remove('hide');$('inv').classList.add('hide');$('letters').classList.add('hide');$('letter').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('welcome').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');$('hud').classList.remove('hide');hud();updateJrn();$('jrn').classList.add('show')}
+function hideJrn(){mode='menu';$('jrn').classList.remove('show');$('jrn').classList.add('hide')}
+$('jrnBtn').onclick=()=>{showJrn();$('jrn').classList.remove('hide')}
+$('jx').onclick=()=>hideJrn()
+
+// ---- Letter sheet ----
+function showLetter(){
+  const id=$('letterd');
+  const pb=LET1.replace(/\\n/g,'\n');
+  const d=document.createElement('div');d.className='sheet';
+  d.innerHTML='<p>'+pb+'</p><p class="sig">Kobby ♥</p><p style="margin-top:12px;font-size:24px">BYEEEEEEEE</p>';
+  id.appendChild(d);
+  $('letter').classList.remove('hide');
+  $('inv').classList.add('hide');$('jrn').classList.add('hide');$('letters').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('welcome').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');$('hud').classList.remove('hide');hud();
+  $('letter').classList.add('show')
+}
+function hideLetter(){mode='menu';$('letter').classList.remove('show');$('letter').classList.add('hide')}
+$('lx2').onclick=()=>hideLetter()
+addEventListener('keydown',e=>{if(!window.gameOn)return;const k=e.key.toLowerCase();if(k==='escape'&&(mode==='puz'||mode==='dlg')){if(mode==='puz')closePz();else nx()}if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();K[k]=1;if(!e.repeat&&(k===' '||k==='e'||k==='enter'))press()});
+addEventListener('keyup',e=>K[e.key.toLowerCase()]=0);
+document.querySelectorAll('.db').forEach(b=>{const k=b.dataset.k;b.onpointerdown=e=>{e.preventDefault();K[k]=1;b.setPointerCapture(e.pointerId)};b.onpointerup=b.onpointercancel=()=>{K[k]=0}});
+$('ab').onpointerdown=e=>{e.preventDefault();press()};$('dlg').onclick=press;gc.onpointerdown=()=>{if(mode==='dlg')nx()};
+$('back').onclick=()=>$('welcome').classList.add('hide');
+show(cur);
+loadSettings();
+
+// ---- Save export/import (QR code) ----
+function exportSave(){
+  try{
+    const data = JSON.stringify(F);
+    // Generate QR code and display it
+    const qr = new QRCode('qr-container', {
+      text: data,
+      width: 200,
+      height: 200,
+      colorDark: '#3b2a5a',
+      colorLight: '#faf0e8'
+    });
+    // Show QR code modal
+    $('qr-modal').classList.remove('hide');
+    $('qr-img').src = '';
+    // Build data URL
+    const canvas = document.createElement('canvas');
+    canvas.width = 200; canvas.height = 200;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#faf0e8';
+    ctx.fillRect(0, 0, 200, 200);
+    QRCode.toDataURL(data, {
+      width: 200,
+      margin: 1,
+      color: { dark: '#3b2a5a', light: '#faf0e8' }
+    }, (dataUrl) => {
+      $('qr-img').src = dataUrl;
+    });
+    $('qr-copy').onclick = () => {
+      navigator.clipboard.writeText(data).then(() => {
+        $('qr-copy').textContent = '✓ Copied!';
+        setTimeout(() => { $('qr-copy').textContent = 'Copy'; }, 2000);
+      });
+    };
+    $('qr-close').onclick = () => { $('qr-modal').classList.add('hide'); };
+    // Auto-hide after 30 seconds
+    setTimeout(() => { $('qr-modal').classList.add('hide'); }, 30000);
+  } catch(e){ say([['','Save export failed']]); }
+}
+function importSave(){
+  // Open camera to scan QR code
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    say([['','Camera not supported on this device. Use a modern phone.']]);
+    return;
+  }
+  try{
+    const stream = navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } });
+    // For now, use the import file input as fallback
+    say([['','Import: point camera at QR code, or use file picker.']]);
+    $('imf').click();
+  } catch(e){ say([['','Camera access denied. Use file picker.']]); }
+}
+$('exp').onclick = exportSave;
+$('im').onclick = importSave;
+$('imf').onchange = (e) => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const o = JSON.parse(r.result);
+      if(o && typeof o === 'object' && o.p1 !== undefined) {
+        // Validate save data
+        const DFkeys = Object.keys({}); // placeholder
+        F = { ...DF, ...o };
+        // Ensure all keys exist
+        const keys = ['intro','met','adjoa','glasses','p1','p2','p3','p4','key','gate','g1','gkey','garden','cafewelcome','c3a','c3b','c3c','cafe','c3w','knifeTut','c4a','c4b','c4c','bridge','gm','gf','c5a','c5b','c5c','ch5','c6qa','c6fin','ch6','ch2','ch3','ch4','sec'];
+        for(const k of keys){ if(!(k in F)) F[k] = 0; if(F[k] !== 0 && F[k] !== 1) F[k] = 1; }
+        save(); hud(); say([['','Save imported. Welcome back!']]);
+        $('qr-modal').classList.add('hide');
+      } else {
+        say([['','Invalid save file.']]);
+      }
+    } catch(e){ say([['','Invalid save file.']]); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+};
+// QR modal HTML (add to body)
+const qrModal = document.createElement('div');
+qrModal.id = 'qr-modal';
+qrModal.className = 'hide';
+qrModal.style.cssText = 'position:fixed;inset:0;z-index:99;background:rgba(29,23,48,.85);display:flex;align-items:center;justify-content:center';
+qrModal.innerHTML = "<div style=\"background:#faf0e8;border:4px solid #3b2a5a;padding:20px;max-width:320px;text-align:center\"><div id=\"qr-img\" style=\"width:200px;height:200px;border:2px solid #3b2a5a\"></div><p style=\"margin:8px 0;font-size:14px\">Scan this QR code with your phone's camera, or press Copy to copy the save code.</p><div style=\"display:flex;gap:8px;justify-content:center\"><button id=\"qr-copy\" style=\"font:inherit;padding:6px 14px;background:#c9b6f2;border:3px solid #3b2a5a\">Copy</button><button id=\"qr-close\" style=\"font:inherit;padding:6px 14px;background:#c9b6f2;border:3px solid #3b2a5a\">Close</button></div></div>";
+document.body.appendChild(qrModal);
+</script>
+</body>
+</html>

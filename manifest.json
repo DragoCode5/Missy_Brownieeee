@@ -1,0 +1,12 @@
+{
+  "name": "Love in Pixels",
+  "short_name": "Love in Pixels",
+  "description": "A pastel pixel-art puzzle adventure. Private, browser-based.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "background_color": "#f1e9ff",
+  "theme_color": "#f1e9ff",
+  "icons": [{ "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

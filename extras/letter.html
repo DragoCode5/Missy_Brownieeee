@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love in Pixels — A Letter to You</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --cream: #faf0e8;
+    --pink: #f4a3c4;
+    --lavender: #cbb5f0;
+    --ink: #3b2457;
+    --soft: #7a5f99;
+    --gold: #e8c97a;
+    --paper: #fffdf8;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #fdf3f7 0%, #f4e8f5 50%, #e8d8f0 100%);
+    font-family: 'Inter', ui-monospace, monospace;
+    color: var(--ink);
+    padding: 24px;
+  }
+
+  .sheet {
+    max-width: 820px;
+    width: 100%;
+    background: var(--cream);
+    border: 1px solid var(--lavender);
+    border-radius: 4px;
+    box-shadow: 0 8px 32px rgba(59, 36, 87, 0.12), 0 2px 8px rgba(59, 36, 87, 0.08);
+    padding: 48px 56px 56px;
+    position: relative;
+    page-break-inside: avoid;
+  }
+
+  /* Decorative heart border */
+  .sheet::before,
+  .sheet::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .sheet::before {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    border: 1px dashed var(--pink);
+    border-radius: 4px;
+    opacity: 0.5;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .header .kicker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--soft);
+    margin-bottom: 8px;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: clamp(24px, 4vw, 38px);
+    color: var(--pink);
+    margin: 0 0 12px;
+    line-height: 1.2;
+  }
+
+  .header .sub {
+    font-size: 14px;
+    color: var(--soft);
+    font-style: italic;
+  }
+
+  .letter {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--ink);
+    text-align: justify;
+    margin: 0 0 28px;
+    hyphens: auto;
+  }
+
+  .letter p {
+    margin: 0 0 18px;
+    text-indent: 1.5em;
+  }
+
+  .letter p:first-child {
+    text-indent: 0;
+  }
+
+  .letter p:last-child {
+    margin-bottom: 0;
+  }
+
+  .accent-line {
+    width: 60px;
+    height: 2px;
+    background: var(--pink);
+    margin: 24px auto;
+    border-radius: 1px;
+  }
+
+  .signoff {
+    text-align: right;
+    font-family: 'Inter', monospace;
+    font-size: 14px;
+    color: var(--ink);
+    margin-top: 24px;
+    letter-spacing: 1px;
+  }
+
+  .signoff .name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    color: var(--pink);
+    font-size: 16px;
+    display: block;
+    margin-top: 6px;
+  }
+
+  .endmark {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    color: var(--gold);
+    font-size: 22px;
+    margin-top: 20px;
+    letter-spacing: 6px;
+  }
+
+  .footer {
+    margin-top: 32px;
+    text-align: center;
+    font-family: 'Inter', monospace;
+    font-size: 10px;
+    color: var(--soft);
+    letter-spacing: 1px;
+  }
+
+  /* Print styles */
+  @media print {
+    body {
+      background: #fff;
+      padding: 0;
+    }
+    .sheet {
+      background: #fff;
+      border: none;
+      box-shadow: none;
+      padding: 40px 48px 48px;
+      max-width: 100%;
+    }
+    .header .kicker { color: #8a6b9e; }
+    .header h1 { color: #c070a8; }
+    .letter { text-align: justify; }
+  }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="header">
+      <p class="kicker">Love in Pixels · A Letter to You</p>
+      <h1>Dear you,</h1>
+      <p class="sub">A little world I made with care</p>
+    </div>
+
+    <p class="letter">I have spent some time getting to know you, and I think I'm starting to understand just how much you mean to me. I like the way you laugh and smile all the time — no, I don't like it, I love it. I made this as a small gift to you.</p>
+
+    <p>I do not know the name of your other brother, so I put <i>"The boy who got scolded"</i> there, sorry for that. I miss the times when we used to talk after church — I miss you a lot. And I wish I could see you again. But you are always in my heart and mind.</p>
+
+    <p>I saw your other siblings in church the last time. I saw Gospel — light-skinned, handsome boy. He was laughing. I saw ANgel too, she looks just like you. Then I saw Prince, the one at John's. I saw your Mom too, beautiful as always. I decided to rewrite the game and add them. It is a little world I made with care and love, because you deserve a world made especially for you.</p>
+
+    <div class="accent-line"></div>
+
+    <p class="letter">Thank you for being you, and thanks for lighting it up and filling my life with colour. I hope you love and like it.</p>
+
+    <p class="signoff">
+      I am an ocean full of love, come and set sail on me.<br>
+      I await you, Beautiful Ship.<br><br>
+      <span class="name">Kobby</span>
+    </p>
+
+    <p class="endmark">♡</p>
+
+    <div class="footer">Love in Pixels · A Letter to You · v1.1</div>
+  </div>
+</body>
+</html>

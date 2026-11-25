@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6e9f3">
+<meta name="description" content="Love in Pixels - a pastel pixel-art puzzle adventure">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Love in Pixels</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<h1>Love in Pixels</h1>
+<p class="sub" id="sub">Who will explore The Little Somewhere?</p>
+
+<!-- Character select -->
+<main id="pick" class="screen">
+  <div class="roster" id="roster" role="group" aria-label="Characters"></div>
+  <section class="detail" aria-live="polite">
+    <div class="stage"><canvas id="big" width="16" height="24"></canvas></div>
+    <div>
+      <h2 id="dName"></h2>
+      <p class="role" id="dRole"></p>
+      <p id="dBlurb"></p>
+      <span class="perk" id="dPerk"></span>
+    </div>
+  </section>
+  <div class="bar">
+    <button class="go" id="go">Start adventure</button>
+    <div class="hint">Tap a character, then tap Start adventure</div>
+    <button class="alt" id="lettersBtn">The Letter</button>
+  </div>
+</main>
+
+<!-- Mode select -->
+<main id="modes" class="screen">
+  <h2 class="mh">Choose your story</h2>
+  <div class="mrow" id="mRow" role="group" aria-label="Story modes"></div>
+  <div class="bar">
+    <button class="go" id="modeGo">Begin story</button>
+    <button class="alt" id="modeBack">Back to characters</button>
+  </div>
+</main>
+
+<!-- Welcome screen -->
+<main id="welcome" class="screen">
+  <div class="stage"><canvas id="wc" width="16" height="24"></canvas></div>
+  <h2 id="wName"></h2>
+  <p id="wMsg"></p>
+  <div class="bar">
+    <button class="go" id="welcomeGo">Begin</button>
+    <button class="alt" id="welcomeBack">Back to characters</button>
+  </div>
+</main>
+
+<!-- Letter screen (revisit-able; spec §9) -->
+<div id="letter" class="screen">
+  <div class="stage"><canvas id="lc" width="16" height="24"></canvas></div>
+  <h2 class="sname">The Letter</h2>
+  <div id="lBody" style="font-size:15px;line-height:1.7"></div>
+  <div class="tok" id="lClose">Close →</div>
+</div>
+
+<!-- Album screen (rewards display) -->
+<div id="album" class="screen">
+  <div class="stage"><canvas id="ac" width="16" height="24"></canvas></div>
+  <h2 class="sname">The Memory Album</h2>
+  <div id="lItems" style="margin:12px 0"></div>
+  <div class="tok" id="aClose">Close →</div>
+</div>
+
+<!-- Video screen -->
+<div id="video" class="screen">
+  <div class="stage"><canvas id="vc" width="16" height="24"></canvas></div>
+  <h2 class="sname">The Photograph</h2>
+  <div id="vItem" style="margin:12px 0;font-size:15px"></div>
+  <video id="vAu" controls playsinline style="width:100%;max-width:640px"></video>
+  <div class="tok" id="vClose">Close →</div>
+</div>
+
+<!-- Music screen -->
+<div id="music" class="screen">
+  <div class="stage"><canvas id="muc" width="16" height="24"></canvas></div>
+  <h2 class="sname">A Music Reward</h2>
+  <div id="mItem" style="margin:12px 0;font-size:15px"></div>
+  <audio id="mAu" controls></audio>
+  <div style="display:flex;gap:8px;justify-content:center;margin:12px 0">
+    <button class="go" id="mPlay" style="padding:6px 14px;font-size:14px">▶</button>
+    <button class="alt" id="mClose2" style="padding:6px 14px;font-size:14px">Close</button>
+  </div>
+</div>
+
+<!-- Game screen -->
+<div id="game" class="screen">
+  <canvas id="gc" width="960" height="576"></canvas>
+  <div id="hud"><span id="hs"></span><span id="ho"></span><button id="gx">Menu</button>
+    <button id="lettersBtn2" class="dp">✉</button></div>
+  <div id="dlg"></div>
+  <div id="dpad">
+    <button class="dp" data-k="u" style="grid-area:1/2" aria-label="Up">▲</button>
+    <button class="dp" data-k="l" style="grid-area:2/1" aria-label="Left">◀</button>
+    <button class="dp" data-k="r" style="grid-area:2/3" aria-label="Right">▶</button>
+    <button class="dp" data-k="d" style="grid-area:3/2" aria-label="Down">▼</button>
+  </div>
+  <button id="act" class="dp" aria-label="Jump/Interact">Interact</button>
+  <div id="rot"><div>↻</div><p>Turn your device sideways to play in landscape.</p></div>
+</div>
+
+<!-- Puzzle screen (spec §7) -->
+<div id="puzzle" class="screen">
+  <div id="pI"></div>
+  <canvas id="ps" width="320" height="192"></canvas>
+  <div id="pU"><p id="pInst" style="text-align:center"></p>
+    <div id="pProg" class="prog"><span id="pBar"></span></div>
+    <div id="pHint" class="dp"></div>
+    <button id="pTap" class="dp">Tap a cell</button>
+  </div>
+</div>
+
+<!-- Terminal screen — Missy.cpp viewer (spec §8.14) -->
+<div id="terminal" class="screen">
+  <h2 class="sname">Missy.cpp — The Gift Program</h2>
+  <div id="termRoot"></div>
+  <div class="tok" id="termClose">Close →</div>
+</div>
+
+<!-- Mirror gift (spec §8.14) -->
+<div id="mirror" class="screen">
+  <canvas id="mrc" width="480" height="480"></canvas>
+  <div id="mirrorPanel">
+    <div id="mirrorText"></div>
+    <div id="mirrorLine"></div>
+    <div id="mirrorVideo"></div>
+    <div id="mirrorPrivacy"></div>
+    <button class="go" id="mirrorCloseBtn">Close →</button>
+  </div>
+</div>
+
+<!-- Inventory screen -->
+<div id="inven" class="screen">
+  <div class="stage"><canvas id="ic" width="16" height="24"></canvas></div>
+  <h2 class="sname">Your Inventory</h2>
+  <div id="iItems" style="margin:12px 0;font-size:14px;max-height:220px;overflow-y:auto"></div>
+  <div class="tok" id="iClose">Close →</div>
+</div>
+
+<!-- Journal screen -->
+<div id="journal" class="screen">
+  <div class="stage"><canvas id="jc" width="16" height="24"></canvas></div>
+  <h2 class="sname">The Journal</h2>
+  <div id="jBody" style="margin:12px 0;font-size:14px;max-height:240px;overflow-y:auto"></div>
+  <div class="tok" id="jClose">Close →</div>
+</div>
+
+<!-- Settings screen -->
+<div id="settings" class="screen">
+  <h2 class="sname">Settings</h2>
+  <div id="sBody" style="margin:12px 0;font-size:14px">
+    <div><input type="checkbox" id="sDark"> <span>Dark mode</span></div>
+    <div><input type="checkbox" id="sSound"> <span>Sound effects</span></div>
+    <div><input type="checkbox" id="sMusic"> <span>Music</span></div>
+    <div><input type="checkbox" id="sSubtitles"> <span>Subtitles</span></div>
+    <div><label style="display:block;margin-top:10px;color:var(--soft)">Controls<select id="sCtrl" style="margin-top:4px;font:inherit;background:var(--panel);border:2px solid var(--ink);padding:4px 8px;color:var(--ink)"><option value="touch">Touch (D-pad + Interact)</option><option value="keyboard">Keyboard (WASD + E)</option><option value="auto">Auto</option></select></label></div>
+  </div>
+  <div class="tok" id="sClose">Done →</div>
+</div>
+
+<!-- Toasts — reward reveals (spec §8.13) -->
+<div id="toast"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

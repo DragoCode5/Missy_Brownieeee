@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6e9f3">
+<meta name="description" content="Love in Pixels - a pastel pixel-art puzzle adventure">
+<title>Love in Pixels</title>
+<style>
+:root{
+  --bg:#f6e9f3;--panel:#fff6e6;--ink:#3b2457;--soft:#7a5f99;--pink:#f4a3c4;--lav:#cbb5f0;--mint:#bfe8d2;--sky:#bfe0f5;--gold:#f2b632;--deep:#3b2457;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#1d1330;--panel:#2c1f45;--ink:#f8ecff;--soft:#c3aee6;--pink:#d4709f;--lav:#6a52a3;--mint:#3d7a62;--sky:#3f6f93;--gold:#f2b632}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#1d1330;--panel:#2c1f45;--ink:#f8ecff;--soft:#c3aee6;--pink:#d4709f;--lav:#6a52a3;--mint:#3d7a62;--sky:#3f6f93;--gold:#f2b632}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Courier New",ui-monospace,monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 14px 40px;line-height:1.5}
+main{width:100%;max-width:880px}
+h1{font-size:clamp(26px,6vw,40px);margin:8px 0 4px;text-align:center;text-shadow:3px 3px 0 var(--pink)}
+.sub{color:var(--soft);margin:0 0 20px;text-align:center}
+.bar{display:flex;flex-direction:column;align-items:center}
+.go{font:inherit;font-weight:bold;font-size:18px;margin-top:20px;padding:12px 26px;background:var(--pink);color:#3b2457;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);cursor:pointer}
+.go:hover{transform:translate(-1px,-1px)}
+.go:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.hint{color:var(--soft);font-size:13px;margin-top:10px}
+.scn{display:none}
+.scn.show{display:block}
+.sname{font-size:22px;color:var(--gold);text-shadow:2px 2px 0 var(--ink)}
+.lbl{font-size:13px;color:#fff;text-shadow:1px 1px 0 var(--ink);font-weight:bold}
+/* Character select */
+.roster{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:620px){.roster{grid-template-columns:repeat(3,1fr)}}
+.card{font:inherit;color:inherit;background:var(--panel);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:10px 4px 8px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.card canvas{width:64px;height:96px;image-rendering:pixelated}
+.card:hover{transform:translate(-1px,-1px)}
+.card:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.card[aria-pressed="true"]{background:var(--lav);box-shadow:4px 4px 0 var(--gold);border-color:var(--gold)}
+.card b{font-size:14px}
+.card span{font-size:12px;color:var(--soft)}
+.card[aria-pressed="true"] span{color:var(--ink)}
+.detail{margin-top:22px;background:var(--panel);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--pink);padding:18px;display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center}
+@media(max-width:520px){.detail{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.stage{width:150px;height:200px;background:linear-gradient(var(--sky) 0 70%,var(--mint) 70%);border:3px solid var(--ink);display:flex;align-items:flex-end;justify-content:center}
+.stage canvas{width:112px;height:168px;image-rendering:pixelated;margin-bottom:6px}
+.detail h2{margin:0 0 2px;font-size:24px}
+.detail p{margin:0 0 8px;max-width:52ch}
+.perk{display:inline-block;background:var(--gold);color:#3b2457;border:2px solid var(--ink);padding:2px 8px;font-size:13px;font-weight:bold}
+.go{font:inherit;font-weight:bold;font-size:18px;margin-top:20px;padding:12px 26px;background:var(--pink);color:#3b2457;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);cursor:pointer}
+.go:hover{transform:translate(-1px,-1px)}
+.go:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+@media(max-width:620px){.roster{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<h1>Love in Pixels</h1>
+<p class="sub" id="sub">Who will explore The Little Somewhere?</p>
+<main id="pick">
+  <div class="roster" id="roster" role="group" aria-label="Characters"></div>
+  <section class="detail" aria-live="polite">
+    <div class="stage"><canvas id="big" width="16" height="24"></canvas></div>
+    <div>
+      <h2 id="dName"></h2>
+      <p class="role" id="dRole"></p>
+      <p id="dBlurb"></p>
+      <span class="perk" id="dPerk"></span>
+    </div>
+  </section>
+  <div class="bar">
+    <button class="go" id="go">Start adventure</button>
+    <div class="hint">Tap a character, then tap Start adventure</div>
+  </div>
+</main>
+<main id="modes">
+  <h2 class="mh">Choose your story</h2>
+  <div class="mrow" id="mRow" role="group" aria-label="Story modes"></div>
+  <div class="bar">
+    <button class="go" id="modeGo">Begin story</button>
+    <button class="alt" id="modeBack">Back to characters</button>
+  </div>
+</main>
+<main id="welcome">
+  <div class="stage"><canvas id="wc" width="16" height="24"></canvas></div>
+  <h2 id="wName"></h2>
+  <p id="wMsg"></p>
+  <div class="bar">
+    <button class="go" id="welcomeGo">Begin</button>
+    <button class="alt" id="welcomeBack">Back to characters</button>
+  </div>
+</main>
+<div id="game">
+  <canvas id="gc" width="960" height="576"></canvas>
+  <div id="hud"><span id="hs"></span><span id="ho"></span><button id="gx">Menu</button></div>
+  <div id="dlg"></div>
+  <div id="dpad">
+    <button class="dp" data-k="u" style="grid-area:1/2" aria-label="Up">▲</button>
+    <button class="dp" data-k="l" style="grid-area:2/1" aria-label="Left">◀</button>
+    <button class="dp" data-k="r" style="grid-area:2/3" aria-label="Right">▶</button>
+    <button class="dp" data-k="d" style="grid-area:3/2" aria-label="Down">▼</button>
+  </div>
+  <button id="act" class="dp" aria-label="Jump/Interact">Interact</button>
+  <div id="rot"><div>↻</div><p>Turn your device sideways to play in landscape.</p></div>
+</div>
+<div id="letter" class="scn">
+  <div class="stage"><canvas id="lc" width="16" height="24"></canvas></div>
+  <h2 class="sname">A Letter to You</h2>
+  <div id="lBody" style="font-size:15px;line-height:1.7"></div>
+  <div class="tok" id="lClose">Close →</div>
+</div>
+<div id="album" class="scn">
+  <div class="stage"><canvas id="ac" width="16" height="24"></canvas></div>
+  <h2 class="sname">The Memory Album</h2>
+  <div id="lItems" style="margin:12px 0"></div>
+  <div class="tok" id="aClose">Close →</div>
+</div>
+<div id="video" class="scn">
+  <div class="stage"><canvas id="vc" width="16" height="24"></canvas></div>
+  <h2 class="sname">A Personal Message</h2>
+  <div id="vItem" style="margin:12px 0;font-size:15px"></div>
+  <video id="vAu" controls playsinline style="width:100%;max-width:640px"></video>
+  <div class="tok" id="vClose">Close →</div>
+</div>
+<div id="music" class="scn">
+  <div class="stage"><canvas id="muc" width="16" height="24"></canvas></div>
+  <h2 class="sname">A Music Reward</h2>
+  <div id="mItem" style="margin:12px 0;font-size:15px"></div>
+  <audio id="mAu" controls></audio>
+  <div style="display:flex;gap:8px;justify-content:center;margin:12px 0">
+    <button class="go" id="mPlay" style="padding:6px 14px;font-size:14px">▶</button>
+    <button class="alt" id="mClose2" style="padding:6px 14px;font-size:14px">Close</button>
+  </div>
+</div>
+<script>
+const TS=16,GW=20,GH=12;
+const CHARS=[
+ {id:"missy",name:"Missy",role:"Explorer",blurb:"The heart of the story. Curious, warm and quick to smile, she follows the clues the mysterious companion leaves behind.",perk:"Draft perk: sees sparkles near hidden clues",skin:"#4a2e20",hair:"#1c1224",style:"long",top:"#f4a3c4",bottom:"#8e6cc4",shoe:"#3b2457",leg:6,torso:6},
+ {id:"gospel",name:"Gospel",role:"10 years old",blurb:"Small, fast and endlessly curious. He fits into tight spots and asks the questions nobody else thinks of.",perk:"Draft perk: can squeeze through small gaps",skin:"#8a5a3c",hair:"#1c1224",style:"buzz",top:"#f2b632",bottom:"#4c78c4",shoe:"#ffffff",leg:3,torso:4},
+ {id:"owusu",name:"Sergeant Owusu-Brown",role:"Soldier",blurb:"Disciplined, steady and secretly soft-hearted. He treats every puzzle like a mission briefing.",perk:"Draft perk: hints cost nothing extra",skin:"#5b3a29",hair:"#1c1224",style:"cap",top:"#5f7f4a",bottom:"#4a6338",shoe:"#2b2118",leg:7,torso:6,medal:true,cap:"#4a6338"},
+ {id:"kobby",name:"Kobby",role:"20 years old",blurb:"Easygoing and playful. He moves fast, jokes often and never turns down a challenge.",perk:"Draft perk: walks faster",skin:"#7a4e34",hair:"#1c1224",style:"short",top:"#6fb8e6",bottom:"#3b2457",shoe:"#f4f0ff",leg:7,torso:6},
+ {id:"kofi",name:"Kofi",role:"A mystery",blurb:"Nobody is sure who he is yet. A hooded figure with a secret that the story slowly reveals.",perk:"Draft perk: finds surprise rewards",skin:"#6b4430",hair:"#1c1224",style:"hood",top:"#7a5fb0",bottom:"#2a1d42",shoe:"#cbb5f0",leg:7,torso:6,hood:"#7a5fb0",badge:true},
+ {id:"prince",name:"Prince",role:"16 years old",blurb:"Confident and dramatic, but secretly earnest. He wants to be taken seriously and tries a few risky shortcuts.",perk:"Draft perk: quick to attempt risky shortcuts",skin:"#d97a4a",hair:"#1c1224",style:"stud",top:"#5f3d8a",bottom:"#c46a8a",shoe:"#3b2457",leg:6,torso:6,grad:true,moto:"#c46a8a"},
+ {id:"angel",name:"AN&#8203;GEL",role:"12 years old",blurb:"Enthusiastic, fearless and a little careless. She notices the small things because she is quick and quick to collect.",perk:"Draft perk: notices the background",skin:"#3b6a7a",hair:"#7a4e34",style:"pigtails",top:"#bfe0f0",bottom:"#3b6a7a",shoe:"#f4f0ff",leg:3,torso:4,pig:"#3b6a7a"},
+ {id:"scolded",name:"The boy who got scolded",role:"15 years old",blurb:"Tries to act tough but is sensitive to being scolded. Dry, awkward humour and quick to deflect with a joke.",perk:"Draft perk: gets an extra hint pass",skin:"#7a5a3c",hair:"#1c1224",style:"kerchief",top:"#9a7a4a",bottom:"#6a4a3c",shoe:"#cbb5f0",leg:7,torso:6,kerc:"#7a4a3c"}
+];
+const MODES=[
+ {id:"adventure",name:"Adventure",blurb:"Explore the world, solve puzzles and find the six Memory Stars.",col:"#f2b632",icon:[".XXX....","X...X...","X...X...",".XXX....","..X.....","..XXX...","..X.....","..XX...."]},
+ {id:"romance",name:"Romance",blurb:"A warm story of letters, photographs and a quiet return of colour.",col:"#e4659a",icon:["..XX..XX.","XXXXXXXX","XXXXXXXX","XXXXXXXX",".XXXXXX.","..XXXX..","...XX...","........"]},
+ {id:"horror",name:"Horror",blurb:"The same world after dark. Flickering lights, strange noises and things that should not be there.",col:"#d9cdf5",icon:["..XXXX..",".XXXXXX.","XXXXXXXX","XXEXXEXX","XXEXXEXX","XXXXXXXX","XXXXXXXX","XX.XX.XX"]}
+];
+</script>
+</body>
+</html>
