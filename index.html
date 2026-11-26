@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f1e9ff">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
 <title>Love in Pixels – Choose your explorer</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
@@ -61,7 +65,7 @@ button{font:inherit;color:var(--ink);cursor:pointer}
 #pz .box,#end .box{max-width:420px;text-align:center;display:flex;flex-direction:column;gap:8px;max-height:100%;overflow:auto;align-items:center}
 #pz h2,#end h2{font:12px/1.5 'Press Start 2P',sans-serif,monospace;margin:0}
 #pz p,#end p{margin:0}
-.pr{display:flex;gap:8px;justify-content:center}
+.pr{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .sm{font:inherit;padding:2px 14px;background:var(--lav);border:3px solid var(--line)}
 .spb{display:flex;gap:8px;justify-content:center}
 .sp2{width:72px;height:60px;background:var(--mint);border:4px solid var(--line);font:inherit}
@@ -73,8 +77,9 @@ button{font:inherit;color:var(--ink);cursor:pointer}
 @media (orientation:portrait){#rot{display:flex}}
 
 /* New screens: Inventory, Journal, Letter sheet */
-#inv,#jrn,#letter{display:none;position:fixed;inset:0;z-index:6;align-items:center;justify-content:center;padding:12px}
-#inv.show,#jrn.show,#letter.show{display:flex}
+#inv,#jrn,#letter,#letters{display:none;position:fixed;inset:0;z-index:7;align-items:center;justify-content:center;padding:12px}
+#inv.show,#jrn.show,#letter.show,#letters.show{display:flex}
+#settings,#credits{position:fixed;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(29,23,48,.75)}
 #inv h2,#jrn h2,#letter h2{font:12px/1.5 'Press Start 2P',sans-serif,monospace;margin:0 0 8px}
 #inv .items,#jrn .entries{display:flex;flex-direction:column;gap:6px;padding:8px 0}
 #inv .items div,#jrn .entries div{display:flex;gap:10px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line)}
@@ -131,7 +136,7 @@ button{font:inherit;color:var(--ink);cursor:pointer}
  <div id="dp"><i></i><button class="db" data-k="arrowup" aria-label="Up">▲</button><i></i><button class="db" data-k="arrowleft" aria-label="Left">◀</button><i></i><button class="db" data-k="arrowright" aria-label="Right">▶</button><i></i><button class="db" data-k="arrowdown" aria-label="Down">▼</button><i></i></div>
  <button id="ab">A</button>
  <div id="pz" class="hide"><div class="box"><h2 id="pt"></h2><p id="pd"></p><div id="pb"></div><p id="pm" style="min-height:1.2em"></p><div class="pr"><button class="sm" id="ph">Hint</button><button class="sm" id="px">Close</button></div></div></div>
- <div id="end" class="hide"><div class="box"><h2>Chapter 1 complete!</h2><p id="eh"></p><p>The flower gate is open. The Garden of Beginnings is next.</p><div class="pr"><button class="sm" id="ea">Play again</button><button class="sm" id="em">Menu</button><button class="sm" id="creditsBtn">Credits</button><button class="sm" id="letBtn">Letters</button><button class="sm" id="jrnBtn">Journal</button><button class="sm" id="setBtn">Settings</button><button class="sm" id="exp">Export save</button><button class="sm" id="im">Import save</button></div></div><input type="file" id="imf" hidden style="display:none"></div>
+ <div id="end" class="hide"><div class="box"><h2>Chapter 1 complete!</h2><p id="eh"></p><p id="es">The flower gate is open. The Garden of Beginnings is next.</p><div class="pr"><button class="sm" id="ec">Continue</button><button class="sm" id="ea">Play again</button><button class="sm" id="em">Menu</button><button class="sm" id="creditsBtn">Credits</button><button class="sm" id="letBtn">Letters</button><button class="sm" id="jrnBtnEnd">Journal</button><button class="sm" id="setBtn">Settings</button><button class="sm" id="exp">Export save</button><button class="sm" id="im">Import save</button></div></div><input type="file" id="imf" hidden style="display:none"></div>
  <div id="letters" class="hide"><div class="box"><h2>Letters</h2><div id="ld"></div><div class="pr"><button class="sm" id="lx">Close</button></div></div></div>
 <div id="inv" class="hide"><div class="box"><h2>Inventory</h2><div id="invd"></div><div class="pr"><button class="sm" id="ix">Close</button></div></div></div>
 <div id="jrn" class="hide"><div class="box"><h2>Journal</h2><div id="jrd"></div><div class="pr"><button class="sm" id="jx">Close</button></div></div></div>
@@ -146,7 +151,7 @@ button{font:inherit;color:var(--ink);cursor:pointer}
 const CHARS=[
  {id:'missy',name:'Missy',role:'Explorer',age:'Age: 20s',blurb:'Curious and observant. Notices the small details and smiles easily.',perk:'Idea: sees sparkles near hidden clues',skin:'#8b5a3a',hair:'#1c1224',top:'#f7c6d9',bottom:'#8b5a3a',shoe:'#ffffff',skirt:'#e8c4b8',longHair:1,braids:1,wide:1,torso:7,leg:8},
  {id:'gospel',name:'Gospel',role:'Little Adventurer',age:'Age: 10',blurb:'Excited, impatient, full of questions. A little scared but brave.',perk:'Idea: squeezes through small gaps',skin:'#f0cfa8',hair:'#2d2b2b',top:'#bfe0f5',bottom:'#6b94d1',shoe:'#ffffff',tuft:1,torso:5,leg:5},
- {id:'owusu',name:'Sgt. Brown',role:'Soldier',age:'Adult',blurb:'Strong and disciplined. Short sentences. Treats every puzzle as a mission.',perk:'Idea: hints cost nothing extra',skin:'#452d22',hair:'#1c1224',top:'#5f7a5a',bottom:'#35527f',shoe:'#2b2b2b',cap:'#3d4a3a',medal:1,wide:1,torso:7,leg:8},
+ {id:'owusu',name:'Officer Owusu-Brown',role:'Soldier',age:'Adult',blurb:'Strong and disciplined. Short sentences. Treats every puzzle as a mission.',perk:'Idea: hints cost nothing extra',skin:'#452d22',hair:'#1c1224',top:'#5f7a5a',bottom:'#35527f',shoe:'#2b2b2b',cap:'#3d4a3a',medal:1,wide:1,torso:7,leg:8},
  {id:'kobby',name:'Kobby',role:'Young Man',age:'Age: 20',blurb:'Calm and reserved. Speaks little, thinks first, dry humour.',perk:'Idea: walks faster',skin:'#5c4a3a',hair:'#2d2b2b',top:'#ffffff',bottom:'#4a6fa5',long:1,shoe:'#f1e8ff',tuft:1,torso:6,leg:7},
  {id:'prince',name:'Prince',role:'Teen Explorer',age:'Age: 16',blurb:'Confident and a bit dramatic, but secretly earnest. Wants to be taken seriously.',perk:'Idea: tries risky shortcuts',skin:'#6b4a38',hair:'#1c1224',top:'#4caf7d',bottom:'#3f5f94',shoe:'#ffffff',grad:1,shirt:['ST.','JOHN’S'],tuft:1,torso:6,leg:7},
  {id:'angel',name:'Angel',role:'Young Explorer',age:'Age: 12',blurb:'Fearless, imaginative, a little careless. Collects tiny treasures.',perk:'Idea: finds things in the background',skin:'#5a3c40',hair:'#1c1224',top:'#fde2f0',bottom:'#5a3c40',shoe:'#ffffff',skirt:'#bfe8d2',tuft:1,torso:5,leg:6},
@@ -156,6 +161,7 @@ const CHARS=[
 const ORDER=['missy','gospel','angel','owusu','mrsbrown','prince','kobby','scolded'];CHARS.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));
 // ---- Sprite: 16x24 logical grid, drawn with fillRect (blink=true closes eyes) ----
 function drawChar(g,c,s,bob,blink){
+ if(!c)return;
  const t=c.torso||6,l=c.leg||6,hd=2,tt=hd+7,lt=tt+t,oy=24-(tt+t+l)+bob;
  const d=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(x*s,(y+oy)*s,w*s,h*s)};
  const bw=c.wide?10:8,bx=c.wide?3:4;
@@ -252,30 +258,32 @@ const O=(id,k,x,y,w,h,e={})=>({id,k,x,y,w,h,s:1,i:1,...e});
 const OB=[O('shop','shop',2,1,3,2,{i:0}),O('adjoa','npc',3,3,1,1,{ch:AJ}),O('fountain','fountain',8,2,2,2),O('gospel','npc',8,4,1,1),
 O('h0','house',12,1,2,2,{d:'blue',dc:COL[2][1],rc:'#c9b6f2'}),O('h1','house',14,1,2,2,{d:'mint',dc:COL[1][1],rc:'#f4a6c0'}),O('h2','house',16,1,2,2,{d:'pink',dc:COL[0][1],rc:'#bfe0f5'}),
 O('chest','chest',14,8,1,1),O('bench','bench',15,8,2,1,{i:0}),O('maze','maze',10,9,2,2),
-O('b0','bed',5,9,1,1),O('b1','bed',17,9,1,1),O('b2','bed',2,6,1,1),O('gate','gate',19,5,1,2),O('kofi','kofi',18,5,1,1,{s:0,i:0,ch:KF}),O('garden_flowers','garden_flowers',20,4,3,2),O('butterflies','butterflies',21,7,3,3),O('garden_key','garden_key',23,9,1,1),O('cafe','cafe',5,15,3,3),O('table','table',5,17,3,2),O('cafenpc','cafenpc',7,16,1,2),O('bridge','bridge',26,9,2,2),O('river','river',24,11,4,2),O('lights','lights',25,8,3,3),O('gm','gm',28,9,1,1),O('gf','gf',30,9,1,1),O('archive','archive',29,10,2,2),O('library','library',31,11,2,2),O('finaldoor','finaldoor',30,12,1,2),O('lantern','lantern',32,8,2,4),O('well','well',3,3,2,2),O('flowerstand','flowerstand',5,8,2,2),O('secretjar','secretjar',8,15,1,2)];
+O('b0','bed',5,9,1,1),O('b1','bed',17,9,1,1),O('b2','bed',2,6,1,1),O('gate','gate',19,5,1,2),O('kofi','kofi',18,5,1,1,{s:0,i:0,ch:KF}),O('garden_flowers','garden_flowers',20,4,3,2),O('butterflies','butterflies',21,7,3,3),O('garden_key','garden_key',23,9,1,1),O('cafe','cafe',5,15,3,3),O('table','table',5,17,3,2),O('cafenpc','cafenpc',7,16,1,2,{ch:CD}),O('bridge','bridge',26,9,2,2),O('river','river',24,11,4,2),O('lights','lights',25,8,3,3),O('gm','gm',28,9,1,1),O('gf','gf',30,9,1,1),O('archive','archive',29,10,2,2),O('library','library',31,11,2,2),O('finaldoor','finaldoor',30,12,1,2),O('lantern','lantern',32,8,2,4),O('well','well',3,3,2,2),O('flowerstand','flowerstand',5,8,2,2),O('secretjar','secretjar',8,15,1,2)];
 const DF={intro:0,met:0,adjoa:0,glasses:0,p1:0,p2:0,p3:0,p4:0,key:0,gate:0,g1:0,gkey:0,garden:0,cafewelcome:0,c3a:0,c3b:0,c3c:0,cafe:0,c3w:0,knifeTut:0,c4a:0,c4b:0,c4c:0,bridge:0,gm:0,gf:0,c5a:0,c5b:0,c5c:0,ch5:0,c6qa:0,c6fin:0,ch6:0,ch2:0,ch3:0,ch4:0,sec:0};
 const LET1="Dear Missy,\n\nI have spent some time getting to know you, and I think I'm starting to understand just how much you mean to me. I like the way you laugh and smile all the time — no, I don't like it, I love it. I made this as a small gift to you.\n\nI do not know the name of your other brother, so I put \"The boy who got scolded\" there, sorry for that. I miss the times when we used to talk after church — I miss you a lot. And I wish I could see you again. But you are always in my heart and mind.\n\nI saw your other siblings in church the last time. I saw Gospel — light-skinned, handsome boy. He was laughing. I saw ANgel too, she looks just like you. Then I saw Prince, the one at John's. I saw your Mom too, beautiful as always. I decided to rewrite the game and add them. It is a little world I made with care and love, because you deserve a world made especially for you.\n\nThank you for being you, and thanks for lighting it up and filling my life with colour. I hope you love and like it.\n\nI am an ocean full of love, come and set sail on me. I await you, Beautiful Ship.\n\nBYEEEEEEEE";
-let F={...DF},P,CH,mode='menu',dq=[],dcb=null,PT=[],raf=0,last=0,AC=null,mute=false,pau=0;const K={};
-function load(){let f={...DF};try{const o=JSON.parse(localStorage.getItem('lip_save'));if(o&&typeof o==='object')for(const k in DF)f[k]=o[k]===1?1:f[k]}catch(e){}return f.gate?{...DF}:f}
-function save(){try{localStorage.setItem('lip_save',JSON.stringify(F))}catch(e){}}
+let F={...DF},P,CH,mode='menu',dq=[],dcb=null,PT=[],raf=0,last=0,AC=null,mute=false,pau=0,overlayFromEnd=false,sayFromEnd=false;const K={};
+const SAVE_KEY='lip_save',SAVE_VER=2;
+function coerceSave(o){const f={...DF};if(o&&typeof o==='object')for(const k in DF)if(o[k]===1||o[k]===true)f[k]=1;return f}
+function load(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return{...DF};const o=JSON.parse(raw);return coerceSave(o)}catch(e){return{...DF}}}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_VER,...F}))}catch(e){}}
 const pcs=()=>F.p1+F.p2+F.p3+F.p4;
 const hearts=()=>(pcs()>=2?1:0)+(pcs()>=4?1:0)+(F.key?1:0);
 const obj=()=>F.gate?'Chapter complete':F.key?'Open the flower gate':F.garden?'The garden is open — the flowers await you':F.cafewelcome?'Explore the town — the Little Café is open':F.bridge?'The Bridge of Stars stands ahead':F.ch5?'The Memory Castle is open — the memories return':F.ch6?'The Lantern of the Place is lit — the stars gather above':pcs()==4?'Put the picture together with '+GN:!F.met?'Find the boy by the fountain':'Find the picture pieces ('+pcs()+'/4)';
 function hud(){$('hh').textContent='\u2665'.repeat(hearts())+'\u2661'.repeat(3-hearts())+(F.key?' \ud83d\udd11':'');$('ob').textContent=obj();gc.style.filter='grayscale('+(F.gate?0:Math.max(.15,.9-.2*pcs()))+')'}
-function tone(f,d=.12,w=0){if(mute)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume&&AC.resume();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+w;o.type='square';o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(AC.destination);o.start(t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.stop(t+d)}catch(e){}}
+function tone(f,d=.12,w=0){if(mute)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume&&AC.resume();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+w;o.type='square';o.frequency.value=f;g.gain.value=.05*sfxVolume;o.connect(g);g.connect(AC.destination);o.start(t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.stop(t+d)}catch(e){}}
 const sfx=a=>a.forEach((f,i)=>tone(f,.12,i*.09));
 function burst(x,y,c,n=14){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=20+Math.random()*50;PT.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-30,l:.7,c})}}
 function reward(){burst(P.x,P.y-12,'#f4a6c0');burst(P.x,P.y-12,'#f2c94c',8);sfx([523,659,784,1047])}
 function reveal(){burst(P.x,P.y-12,'#f4a6c0');burst(P.x,P.y-12,'#f2c94c',8);sfx([523,659,784,1047])}
-function say(l,cb){dq=l.slice();dcb=cb;mode='dlg';nx()}
-function nx(){const d=$('dlg');if(!dq.length){d.classList.add('hide');mode='play';const c=dcb;dcb=null;c&&c();return}const l=dq.shift();d.innerHTML='';if(l[0]){const b=document.createElement('b');b.textContent=l[0];d.appendChild(b)}const s=document.createElement('span');s.textContent=l[1];d.appendChild(s);d.classList.remove('hide');tone(440,.05)}
+function say(l,cb){if(!$('end').classList.contains('hide'))sayFromEnd=true;$('end').classList.add('hide');dq=l.slice();dcb=cb;mode='dlg';nx()}
+function nx(){const d=$('dlg');if(!dq.length){d.classList.add('hide');mode='play';const c=dcb;dcb=null;c&&c();if(mode==='play'&&sayFromEnd){sayFromEnd=false;$('end').classList.remove('hide');mode='end'}return}const l=dq.shift();d.innerHTML='';if(l[0]){const b=document.createElement('b');b.textContent=l[0];d.appendChild(b)}const s=document.createElement('span');s.textContent=l[1];d.appendChild(s);d.classList.remove('hide');tone(440,.05)}
 function hit(x,y){const l=x-5,r=x+5,t=y-4,b=y;if(l<0||t<0||r>W*TS||b>H*TS)return true;for(let ty=Math.floor(t/TS);ty<=Math.floor((b-.01)/TS);ty++)for(let tx=Math.floor(l/TS);tx<=Math.floor((r-.01)/TS);tx++)if(MAP[ty][tx]=='T')return true;for(const o of OB)if(o.s&&!(r<=o.x*TS||l>=(o.x+o.w)*TS||b<=o.y*TS||t>=(o.y+o.h)*TS))return true;return false}
 function near(){let b=null,bd=99;for(const o of OB){if(!o.i)continue;const rx=o.x*TS,ry=o.y*TS,py=P.y-3,dx=Math.max(rx-P.x,0,P.x-(rx+o.w*TS)),dy=Math.max(ry-py,0,py-(ry+o.h*TS)),d=Math.hypot(dx,dy);if(d<14&&d<bd){bd=d;b=o}}return b}
 function upd(dt){if(pau||mode!=='play'){P.vx=P.vy=0;P.mv=0;return}let ax=(K.arrowright||K.d?1:0)-(K.arrowleft||K.a?1:0),ay=(K.arrowdown||K.s?1:0)-(K.arrowup||K.w?1:0);if(ax&&ay){ax*=.7071;ay*=.7071}const f=Math.min(1,dt*14);P.vx+=(ax*SPD-P.vx)*f;P.vy+=(ay*SPD-P.vy)*f;const nx_=P.x+P.vx*dt;if(!hit(nx_,P.y))P.x=nx_;else P.vx=0;const ny=P.y+P.vy*dt;if(!hit(P.x,ny))P.y=ny;else P.vy=0;P.mv=Math.hypot(P.vx,P.vy)>8}
 const R=(x,y,w,h,c)=>{gx.fillStyle=c;gx.fillRect(Math.round(x),Math.round(y),w,h)};
 function drawOb(o,t){const X=o.x*TS,Y=o.y*TS;switch(o.k){
 case 'shop':R(X,Y+12,48,20,'#faf0e8');R(X,Y+12,48,2,'#e0cdbf');R(X-2,Y,52,14,'#f4a6c0');R(X-2,Y+8,52,3,'#e58aa8');R(X+19,Y+16,10,16,'#7a5a8a');R(X+6,Y+17,8,7,'#bfe0f5');R(X+34,Y+17,8,7,'#bfe0f5');break;
-case 'npc':drawChar(sg,o.ch,1,0,false);gx.drawImage(sc,X,Y-8);break;
+case 'npc':if(o.ch){drawChar(sg,o.ch,1,0,false);gx.drawImage(sc,X,Y-8)}break;
 case 'kofi':if(F.kofiShow){drawChar(sg,o.ch,1,0,false);gx.drawImage(sc,X,Y-8)}break;
 case 'fountain':R(X,Y+10,32,22,'#d9d0e8');R(X,Y+10,32,3,'#efe8f8');R(X+3,Y+14,26,14,'#bfe0f5');R(X+13,Y+3,6,15,'#d9d0e8');for(let i=0;i<3;i++){const h=3+((t*6+i*2)|0)%3;R(X+6+i*9,Y+13-h,2,h,'#e6f4ff')}break;
 case 'house':R(X,Y+10,32,22,'#faf0e8');R(X-2,Y+2,36,10,o.rc);R(X+11,Y+17,10,15,'#3b2a5a');R(X+12,Y+18,8,14,o.dc);R(X+3,Y+16,5,5,'#bfe0f5');R(X+24,Y+16,5,5,'#bfe0f5');break;
@@ -283,13 +291,13 @@ case 'chest':R(X+1,Y+6,14,9,'#b07a4a');R(X+1,Y+4,14,4,F.p3?'#7a4f2a':'#c9955f');
 case 'bench':R(X,Y+5,32,4,'#c9955f');R(X,Y+9,32,1,'#a87a4a');R(X+2,Y+10,3,6,'#8a6a5a');R(X+27,Y+10,3,6,'#8a6a5a');break;
 case 'maze':R(X,Y+4,32,28,'#4fa57e');R(X+2,Y+6,28,24,'#6fc29a');R(X+12,Y+22,8,10,'#bfe8d2');R(X+6,Y+10,6,2,'#8fd6b3');R(X+20,Y+14,6,2,'#8fd6b3');break;
 case 'bed':R(X+1,Y+8,14,7,'#8a6a5a');[[3,5,'#f48fb8'],[7,3,'#ffc48a'],[11,5,'#7fb8e8'],[5,9,'#f2c94c'],[10,9,'#f48fb8']].forEach(f=>{R(X+f[0],Y+f[1],3,3,f[2]);R(X+f[0]+1,Y+f[1]+3,1,3,'#6fc29a')});break;
-case 'gate':R(X,Y,3,32,'#c9b6f2');R(X+13,Y,3,32,'#c9b6f2');for(let k=0;k<4;k++){if(!F.gate){R(X+3,Y+4+k*8,10,2,'#6fc29a');R(X+6+(k%2)*3,Y+2+k*8,3,3,'#f4a6c0')}else{R(X-2,Y+4+k*8,3,3,'#f4a6c0');R(X+15,Y+4+k*8,3,3,'#f4a6c0')}}break;case 'garden_flowers':for(let i=0;i<3;i++){R(X+i*6,Y+4,4,3,'#ffd166');R(X+i*6+1,Y+5,2,3,'#f4a6c0')}break;case 'butterflies':[[3,3],[4,4],[5,5]].forEach(p=>{R(X+p[0]*4-2,Y+p[1]*4,6,10,'#ffd166');R(X+p[0]*4+1,Y+p[1]*4,3,6,'#f2c94c')});break;case 'garden_key':if(F.gkey){R(X+1,Y+2,4,3,'#8a6a5a');R(X+2,Y+1,3,3,'#f2c94c')}break;case 'cafe':R(X,Y+6,36,10,'#faf0e8');R(X+4,Y,8,8,'#b07a4a');R(X+4,Y+4,28,4,'#e58aa8');R(X+12,Y+8,16,8,'#fff3a0');R(X+2,Y+14,6,2,'#c9955f');break;case 'table':R(X,Y+8,28,2,'#c9955f');R(X,Y+4,28,6,'#b07a4a');R(X+10,Y+12,6,2,'#8a6a5a');break;case 'cafenpc':drawChar(sg,o.ch,1,0,false);gx.drawImage(sc,X,Y-8);break;case 'bridge':R(X,Y+4,32,6,'#c9b6f2');R(X+4,Y,24,8,'#fff3a8');break;case 'river':R(X,Y+2,40,2,'#4fa57e');R(X+12,Y+10,8,2,'#6fc29a');R(X+20,Y+10,8,2,'#6fc29a');break;case 'lights':for(let i=0;i<3;i++)R(X+i*10,Y+6,6,8,'#f2c94c');break;case 'castle':R(X,Y+6,36,10,'#f2c94c');R(X+4,Y,8,8,'#7a5fb0');R(X+4,Y+4,28,4,'#c9b6f2');R(X+2,Y+14,6,2,'#5c4a3a');break;case 'archive':R(X,Y+4,20,8,'#c9b6f2');R(X+4,Y+12,4,2,'#8a6a5a');R(X+2,Y+4,2,2,'#b07a4a');break;case 'library':R(X,Y+6,24,8,'#b07a4a');R(X+4,Y+6,16,6,'#a87a4a');break;case 'finaldoor':R(X+2,Y+2,4,12,'#2e3f63');R(X+2,Y+12,4,4,'#3b2a5a');break;case 'lantern':R(X,Y+8,36,8,'#fff3a8');R(X+8,Y+2,8,10,'#f2c94c');R(X+4,Y+6,8,2,'#c9955f');R(X+12,Y+6,8,2,'#c9955f');R(X+18,Y+12,2,6,'#6fc29a');break;case 'well':R(X+2,Y+6,14,6,'#c9955f');R(X+5,Y+10,6,6,'#8a6a5a');R(X+2,Y+4,10,2,'#a87a4a');break;case 'flowerstand':R(X+2,Y+12,6,4,'#8a6a5a');R(X,Y+8,12,4,'#ffd166');R(X+2,Y+6,8,2,'#f4a6c0');break;case 'secretjar':R(X,Y+6,10,10,'#f48fb8');R(X+4,Y+4,10,2,'#f2c94c');R(X+2,Y+12,4,2,'#8a6a5a');break}}
+case 'gate':R(X,Y,3,32,'#c9b6f2');R(X+13,Y,3,32,'#c9b6f2');for(let k=0;k<4;k++){if(!F.gate){R(X+3,Y+4+k*8,10,2,'#6fc29a');R(X+6+(k%2)*3,Y+2+k*8,3,3,'#f4a6c0')}else{R(X-2,Y+4+k*8,3,3,'#f4a6c0');R(X+15,Y+4+k*8,3,3,'#f4a6c0')}}break;case 'garden_flowers':for(let i=0;i<3;i++){R(X+i*6,Y+4,4,3,'#ffd166');R(X+i*6+1,Y+5,2,3,'#f4a6c0')}break;case 'butterflies':[[3,3],[4,4],[5,5]].forEach(p=>{R(X+p[0]*4-2,Y+p[1]*4,6,10,'#ffd166');R(X+p[0]*4+1,Y+p[1]*4,3,6,'#f2c94c')});break;case 'garden_key':if(F.gkey){R(X+1,Y+2,4,3,'#8a6a5a');R(X+2,Y+1,3,3,'#f2c94c')}break;case 'cafe':R(X,Y+6,36,10,'#faf0e8');R(X+4,Y,8,8,'#b07a4a');R(X+4,Y+4,28,4,'#e58aa8');R(X+12,Y+8,16,8,'#fff3a0');R(X+2,Y+14,6,2,'#c9955f');break;case 'table':R(X,Y+8,28,2,'#c9955f');R(X,Y+4,28,6,'#b07a4a');R(X+10,Y+12,6,2,'#8a6a5a');break;case 'cafenpc':if(o.ch){drawChar(sg,o.ch,1,0,false);gx.drawImage(sc,X,Y-8)}break;case 'bridge':R(X,Y+4,32,6,'#c9b6f2');R(X+4,Y,24,8,'#fff3a8');break;case 'river':R(X,Y+2,40,2,'#4fa57e');R(X+12,Y+10,8,2,'#6fc29a');R(X+20,Y+10,8,2,'#6fc29a');break;case 'lights':for(let i=0;i<3;i++)R(X+i*10,Y+6,6,8,'#f2c94c');break;case 'castle':R(X,Y+6,36,10,'#f2c94c');R(X+4,Y,8,8,'#7a5fb0');R(X+4,Y+4,28,4,'#c9b6f2');R(X+2,Y+14,6,2,'#5c4a3a');break;case 'archive':R(X,Y+4,20,8,'#c9b6f2');R(X+4,Y+12,4,2,'#8a6a5a');R(X+2,Y+4,2,2,'#b07a4a');break;case 'library':R(X,Y+6,24,8,'#b07a4a');R(X+4,Y+6,16,6,'#a87a4a');break;case 'finaldoor':R(X+2,Y+2,4,12,'#2e3f63');R(X+2,Y+12,4,4,'#3b2a5a');break;case 'lantern':R(X,Y+8,36,8,'#fff3a8');R(X+8,Y+2,8,10,'#f2c94c');R(X+4,Y+6,8,2,'#c9955f');R(X+12,Y+6,8,2,'#c9955f');R(X+18,Y+12,2,6,'#6fc29a');break;case 'well':R(X+2,Y+6,14,6,'#c9955f');R(X+5,Y+10,6,6,'#8a6a5a');R(X+2,Y+4,10,2,'#a87a4a');break;case 'flowerstand':R(X+2,Y+12,6,4,'#8a6a5a');R(X,Y+8,12,4,'#ffd166');R(X+2,Y+6,8,2,'#f4a6c0');break;case 'secretjar':R(X,Y+6,10,10,'#f48fb8');R(X+4,Y+4,10,2,'#f2c94c');R(X+2,Y+12,4,2,'#8a6a5a');break}}
 function render(t){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const m=MAP[y][x],X=x*TS,Y=y*TS;if(m=='p'){R(X,Y,16,16,'#f2d8b0');R(X+3,Y+4,2,2,'#e6c79a');R(X+10,Y+11,2,2,'#e6c79a')}else{R(X,Y,16,16,'#bfe8d2');if((x*7+y*3)%4==0){R(X+4,Y+5,1,3,'#9fd6bb');R(X+10,Y+10,1,3,'#9fd6bb')}}if(m=='T'){R(X+6,Y+8,4,8,'#8a6a5a');R(X,Y,16,11,'#6fc29a');R(X+2,Y+1,6,3,'#8fd6b3')}}
 const L=OB.map(o=>({y:(o.y+o.h)*TS,f:()=>drawOb(o,t)}));L.push({y:P.y,f:()=>{drawChar(sg,CH,1,P.mv?(Math.floor(t*8)%2?0:-1):0,false);gx.drawImage(sc,Math.round(P.x-8),Math.round(P.y-24))}});L.sort((a,b)=>a.y-b.y).forEach(e=>e.f());
 PT.forEach(p=>R(p.x,p.y,2,2,p.c));if(mode==='play'){const o=near();if(o){const cx=o.x*TS+o.w*TS/2-4,cy=Math.max(2,o.y*TS-8);R(cx,cy,8,9,'#f4a6c0');R(cx+3,cy+2,2,4,'#3b2a5a');R(cx+3,cy+7,2,1,'#3b2a5a')}}}
-function loop(n){if(!window.gameOn){raf=0;return}const dt=Math.min(.05,(n-last)/1000);last=n;upd(dt);PT=PT.filter(p=>(p.l-=dt)>0);PT.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=90*dt});render(n/1000);raf=requestAnimationFrame(loop)}
+function loop(n){if(!window.gameOn){raf=0;return}const dt=Math.min(.05,(n-last)/1000);last=n;try{upd(dt);PT=PT.filter(p=>(p.l-=dt)>0);PT.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=90*dt});render(n/1000)}catch(e){console.error('frame error',e)}raf=requestAnimationFrame(loop)}
 function mk(t,f){const e=document.createElement('button');e.className='sm';e.textContent=t;e.onclick=f;return e}
-function openPz(title,desc,build,hints){mode='puz';window.pzKey=null;$('pt').textContent=title;$('pd').textContent=desc;$('pm').textContent='';const b=$('pb');b.innerHTML='';build(b);let hi=0,st=0;$('ph').onclick=()=>{if(st){clearTimeout(st);st=0}$('pm').textContent=hints[Math.min(hi++,hints.length-1)];st=setTimeout(()=>{const t=hints[Math.min(hi,hints.length-1)];if(t&&t!==$('pm').textContent){$('pm').textContent=t;hi++}},30000)};$('px').onclick=closePz;$('pz').classList.remove('hide')}
+function openPz(title,desc,build,hints){sayFromEnd=false;mode='puz';window.pzKey=null;$('pt').textContent=title;$('pd').textContent=desc;$('pm').textContent='';const b=$('pb');b.innerHTML='';build(b);let hi=0,st=0;$('ph').onclick=()=>{if(st){clearTimeout(st);st=0}$('pm').textContent=hints[Math.min(hi++,hints.length-1)];st=setTimeout(()=>{const t=hints[Math.min(hi,hints.length-1)];if(t&&t!==$('pm').textContent){$('pm').textContent=t;hi++}},30000)};$('px').onclick=closePz;$('pz').classList.remove('hide')}
 function closePz(){$('pz').classList.add('hide');if(mode==='puz')mode='play'}
 function getPiece(n){const first=pcs()==0;F['p'+n]=1;save();hud();reward();const L=[['','You found picture piece '+n+' of 4.']];if(first)L.unshift([CH.name,LN[CH.id][2]]);say(L)}
 function pzF(){const seq=[0,2,1],btn=[];let inp=[],busy=1;
@@ -429,18 +437,26 @@ function ch5Done(){
 
 function shake(el){if(!el||!el.animate)return;el.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(-3px)'},{transform:'translateX(3px)'},{transform:'translateX(-2px)'},{transform:'translateX(0)'}],{duration:160,easing:'ease-out'})}
 function chCard(n){
- if($('end').dataset.xc)return;
- $('end').dataset.xc=1;mode='end';shake($('gw'));reveal();
- const h2=$('end').querySelector('h2');h2.textContent='Chapter '+n+' complete!';
- const ct={2:'The garden is open — the flowers await you.',3:'The Little Café is bright — Mireille is making a vanilla ice cream.',4:'The Bridge of Stars stands ahead.',5:'The Memory Castle opens — the memories return.'};
+ const end=$('end');
+ if(end.dataset.xc===String(n)&&!end.classList.contains('hide'))return;
+ end.dataset.xc=String(n);mode='end';shake($('gw'));reveal();
+ $('dlg').classList.add('hide');
+ const h2=end.querySelector('h2');h2.textContent='Chapter '+n+' complete!';
+ const ct={2:'The garden is open — the flowers await you.',3:'The Little Café is bright — Mireille is making a vanilla ice cream.',4:'The Bridge of Stars stands ahead.',5:'The Memory Castle opens — the memories return.',6:'The Lantern is lit — the stars gather above you.'};
  $('eh').textContent=ct[n]||'';
- $('end').classList.remove('hide');
+ $('es').textContent={2:'The Garden of Beginnings is open — the flowers are waiting.',3:'The Little Café is open — step inside.',4:'The Bridge of Stars stands ahead.',5:'The Memory Castle opens — walk the archives.',6:'The Lantern is lit — the night is gentle now.'}[n]||'Onward.';
+ end.classList.remove('hide');save();
 }
 function showCredits(){$('credits').classList.remove('hide')}
 const LET2="Dear you,\n\nYou made it to the garden. I hoped you would.\n\nThis is where the colour starts to come back, so I tried to make it a gentle place. Just flowers and a few butterflies, nothing too hard. I didn't want you to feel rushed.\n\nI am looking at a photo of you as I write this letter. I look at it a lot and it makes me smile every time. There's a dandelion as well. Make a wish on it if you like. I won't ask what it was.\n\nI hope you're doing okay today. I think about you more than I say.\n\nOkay, go and find the next bit. Bye for now.\n\nKobby";
 const LETA=[LET1,LET2];
-function showLetters(){const ld=$('ld');ld.innerHTML='';LETA.forEach(t=>{const e=document.createElement('div');e.style.cssText='max-height:52vh;overflow:auto;text-align:left;font-size:16px;line-height:1.35;margin:6px 0;border:2px solid var(--line);padding:8px';e.textContent=t;ld.appendChild(e)});$('letters').classList.remove('hide')}
-function hideLetters(){$('letters').classList.add('hide')}
+function showLetters(){
+ const ld=$('ld');ld.innerHTML='';LETA.forEach(t=>{const e=document.createElement('div');e.style.cssText='max-height:52vh;overflow:auto;text-align:left;font-size:16px;line-height:1.35;margin:6px 0;border:2px solid var(--line);padding:8px;background:var(--panel);color:var(--ink)';e.textContent=t;ld.appendChild(e)});
+ overlayFromEnd=!$('end').classList.contains('hide');
+ $('end').classList.add('hide');$('inv').classList.remove('show');$('jrn').classList.remove('show');$('letter').classList.remove('show');$('settings').classList.add('hide');$('credits').classList.add('hide');$('pz').classList.add('hide');$('dlg').classList.add('hide');
+ mode='letters';$('letters').classList.remove('hide');$('letters').classList.add('show');
+}
+function hideLetters(){if(overlayFromEnd){overlayFromEnd=false;$('end').classList.remove('hide');mode='end'}else mode=window.gameOn?'play':'menu';$('letters').classList.remove('show');$('letters').classList.add('hide')}
 function themeToggle(){
  const el=document.documentElement;
  const cur=el.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
@@ -501,7 +517,7 @@ function ch6Done(){
  say([["Mireille","The stars are lit. And the heart — the heart gives the name. It has been ours all along."],["Missy","Look in the mirror."]],()=>setTimeout(showMirror,400));
 }
 function showMirror(){
- $('end').classList.add('hide');
+ sayFromEnd=false;$('end').classList.add('hide');
  const b=$('pb');b.innerHTML='';
  const wrap=document.createElement('div');wrap.style.cssText='position:relative;width:210px;margin:0 auto';
  const vid=document.createElement('video');vid.muted=true;vid.playsInline=true;vid.style.cssText='width:210px;height:210px;border:4px solid #3b2a5a;background:#f2c94c';
@@ -511,7 +527,7 @@ function showMirror(){
  try{navigator.mediaDevices&&navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(s=>{img.style.display='none';vid.srcObject=s;vid.play()},()=>{})}catch(e){}
  $('pt').textContent='The Mirror';$('pd').textContent='Your face, as in a true mirror — The best gift is you, yourself, Missy.';
  $('ph').style.display='none';
- $('px').onclick=()=>{$('pz').classList.add('hide');$('end').classList.remove('hide');mode='end';setTimeout(addExitButton,300)};
+ $('px').onclick=()=>{$('pz').classList.add('hide');chCard(6);setTimeout(addExitButton,300)};
  $('pz').classList.remove('hide');mode='puz';
 }
 function addExitButton(){
@@ -574,15 +590,14 @@ case 'chest':if(F.p3)say([['','The chest is empty now.']]);else say([['','Carved
 case 'maze':if(F.p4)say([['','The maze is quiet now.']]);else say([[GN,'I’ll wait at the entrance and shout if you go wrong. Left! No, your other left!']],pzM);break;
 case 'h0':case 'h1':case 'h2':say([['','A little house with a '+o.d+' door.']]);break;
 case 'b0':case 'b1':case 'b2':if(o.id=='b1'&&F.adjoa&&!F.glasses){F.glasses=1;save();burst(o.x*TS+8,o.y*TS+4,'#f2c94c');sfx([784,988]);say([['','You found Mrs. Adjoa’s glasses!']])}else say([['','Just flowers here.']]);break;
-case 'gate':if(!F.key)say([['','The gate sleeps until the picture is whole.']]);else{F.gate=1;F.kofiShow=1;save();hud();burst(o.x*TS+8,o.y*TS+16,'#f4a6c0',24);sfx([523,659,784,1047]);say([['','The key turns, and colour floods back.'],['','A hooded figure stands at the end of the path.'],['Kofi','The Keeper says to be careful of the butterflies.'],[CH.name,LN[id][4]],['','He is gone. The path to the Garden of Beginnings is open.']],()=>{F.kofiShow=0;finish()})}break;case 'garden_flowers':if(F.g1)say([['','The garden flowers hum in colour.']]);else say([[GN,'The flowers are all facing the sun. Watch the pattern.']],pzG);break;case 'butterflies':if(F.gkey)say([['','The butterflies have rested at the trail’s end.']]);else say([[GN,'Look! They follow a trail. Tap to follow them.']],pzBT);break;case 'garden_key':if(!F.gkey)say([['','Nothing here yet. Follow the butterflies.']]);else if(!F.garden){F.garden=1;save();hud();reward();if(!F.ch2){F.ch2=1;chCard(2)}say([['', 'A small key is hidden in the garden flowers. The colour spreads beyond the town.']],()=>setTimeout(()=>{showPhoto('assets/photos/you.jpg','You');showPhoto('assets/photos/dandelion-extract.jpg','Dandelion Extract');setTimeout(knifeTut,900)},800))}else say([['','The key fits nothing you know of yet.']]);break;case 'cafe':if(!F.cafewelcome){F.cafewelcome=1;save();say([['', 'Welcome to the Little Café — Mireille is making a vanilla ice cream. The waitress will tell you about the day.']])}else if(!F.c3a)pzOrd();else say([['', 'The counter is clear now.']]);break;case 'table':if(!F.c3b)pzSecTable();else say([['', 'The drawer is empty now.']]);break;case 'cafenpc':if(F.cafe){if(!F.c3w){F.c3w=1;save();showRew('Be Happy',x=>{const v=document.createElement('video');v.src='assets/music/be-happy.mp4';v.controls=true;v.playsInline=true;v.style.cssText='max-height:48vh;max-width:100%';const m=document.createElement('p');v.onerror=()=>{m.textContent='The video file is not available in this copy.'};x.append(v,m)})}else say([[CD.name,'A lovely day, isn’t it?']])}else if(!F.c3c)pzConv();else say([[CD.name,'Hello!']]);break;case 'bridge':if(F.bridge)say([['', 'The Bridge of Stars is quiet now.']]);else say([['', 'A bridge over the river, lit by stars.']],pzConst);break;case 'river':if(F.c4b)say([['', 'The river is crossed.']]);else say([['', 'Step stones across the river.']],pzRiver);break;case 'lights':if(F.c4c)say([['', 'The lights have rested.']]);else say([['', 'Tap the lights in their sequence.']],pzLights);break;case 'gm':if(!F.gm){F.gm=1;save();say([['Grandmother','Help, please. We lost our way and our memories. The Memory Castle is to the east — will you find the way with us?']])}else say([['Grandmother','Whenever you are ready, we will walk to the castle.']]);break;case 'gf':if(!F.gf){F.gf=1;save();say([['Grandfather','The castle is east of us. If the archive holds their memories, they may return.']])}else say([['Grandfather','Memory returns where a heart opens the door.']]);break;case 'archive':if(!F.c5a)pzMemArchive();else say([['', 'The archive is empty now.']]);break;case 'library':if(!F.c5b)pzLibLock();else say([['', 'The library is quiet now.']]);break;case 'finaldoor':if(!F.c5c)pzFinalDoor();else ch5Done();break;case 'lantern':if(F.ch6)say([['', 'The lantern is lit — the stars gather above us.']]);else say([['', 'A lantern with six empty stars stands here. Who could light it?']],pzQA);break;case 'secretjar':if(F.sec){say([['', 'The jar is empty now.']])}else{F.sec=1;save();burst(o.x*TS+8,o.y*TS+6,'#ffd166',8);say([['', 'A hidden jar! It looks like it holds something sweet — keep it for later.']],()=>{reward()})}break}}
-function showRew(t,f){reveal();$('end').classList.add('hide');openPz(t,'',f,['']);$('ph').style.display='none';$('px').onclick=()=>{const v=$('pb').querySelector('video');v&&v.pause();$('pz').classList.add('hide');$('ph').style.display='';$('end').classList.remove('hide');mode='end'}}
+case 'gate':if(!F.key)say([['','The gate sleeps until the picture is whole.']]);else{F.gate=1;F.kofiShow=1;save();hud();burst(o.x*TS+8,o.y*TS+16,'#f4a6c0',24);sfx([523,659,784,1047]);say([['','The key turns, and colour floods back.'],['','A hooded figure stands at the end of the path.'],['Kofi','The Keeper says to be careful of the butterflies.'],[CH.name,LN[id][4]],['','He is gone. The path to the Garden of Beginnings is open.']],()=>{F.kofiShow=0;finish()})}break;case 'garden_flowers':if(F.g1)say([['','The garden flowers hum in colour.']]);else say([[GN,'The flowers are all facing the sun. Watch the pattern.']],pzG);break;case 'butterflies':if(F.gkey)say([['','The butterflies have rested at the trail’s end.']]);else say([[GN,'Look! They follow a trail. Tap to follow them.']],pzBT);break;case 'garden_key':if(!F.gkey)say([['','Nothing here yet. Follow the butterflies.']]);else if(!F.garden){F.garden=1;save();hud();reward();if(!F.ch2){F.ch2=1;chCard(2)}say([['', 'A small key is hidden in the garden flowers. The colour spreads beyond the town.']],()=>setTimeout(()=>{showPhoto('assets/photos/you.jpg','You');showPhoto('assets/photos/dandelion-extract.jpg','Dandelion Extract');setTimeout(knifeTut,900)},800))}else say([['','The key fits nothing you know of yet.']]);break;case 'cafe':if(!F.cafewelcome){F.cafewelcome=1;save();say([['', 'Welcome to the Little Café — Mireille is making a vanilla ice cream. The waitress will tell you about the day.']])}else if(!F.c3a)pzOrd();else say([['', 'The counter is clear now.']]);break;case 'table':if(!F.c3b)pzSecTable();else say([['', 'The drawer is empty now.']]);break;case 'cafenpc':if(F.cafe){if(!F.c3w){F.c3w=1;save();showRew('Be Happy',x=>{const v=document.createElement('video');v.src='assets/music/be-happy.mp4';v.controls=true;v.playsInline=true;v.volume=musicVolume;v.muted=mute;v.style.cssText='max-height:48vh;max-width:100%';const m=document.createElement('p');v.onerror=()=>{m.textContent='The video file is not available in this copy.'};x.append(v,m)})}else say([[CD.name,'A lovely day, isn’t it?']])}else if(!F.c3c)pzConv();else say([[CD.name,'Hello!']]);break;case 'bridge':if(F.bridge)say([['', 'The Bridge of Stars is quiet now.']]);else say([['', 'A bridge over the river, lit by stars.']],pzConst);break;case 'river':if(F.c4b)say([['', 'The river is crossed.']]);else say([['', 'Step stones across the river.']],pzRiver);break;case 'lights':if(F.c4c)say([['', 'The lights have rested.']]);else say([['', 'Tap the lights in their sequence.']],pzLights);break;case 'gm':if(!F.gm){F.gm=1;save();say([['Grandmother','Help, please. We lost our way and our memories. The Memory Castle is to the east — will you find the way with us?']])}else say([['Grandmother','Whenever you are ready, we will walk to the castle.']]);break;case 'gf':if(!F.gf){F.gf=1;save();say([['Grandfather','The castle is east of us. If the archive holds their memories, they may return.']])}else say([['Grandfather','Memory returns where a heart opens the door.']]);break;case 'archive':if(!F.c5a)pzMemArchive();else say([['', 'The archive is empty now.']]);break;case 'library':if(!F.c5b)pzLibLock();else say([['', 'The library is quiet now.']]);break;case 'finaldoor':if(!F.c5c)pzFinalDoor();else ch5Done();break;case 'lantern':if(F.ch6)say([['', 'The lantern is lit — the stars gather above us.']]);else say([['', 'A lantern with six empty stars stands here. Who could light it?']],pzQA);break;case 'secretjar':if(F.sec){say([['', 'The jar is empty now.']])}else{F.sec=1;save();burst(o.x*TS+8,o.y*TS+6,'#ffd166',8);say([['', 'A hidden jar! It looks like it holds something sweet — keep it for later.']],()=>{reward()})}break}}
+function showRew(t,f){const fromEnd=!$('end').classList.contains('hide');reveal();$('end').classList.add('hide');openPz(t,'',f,['']);$('ph').style.display='none';$('px').onclick=()=>{const v=$('pb').querySelector('video');v&&v.pause();$('pz').classList.add('hide');$('ph').style.display='';if(fromEnd){$('end').classList.remove('hide');mode='end'}else mode='play'}}
 function finish(){mode='end';$('eh').textContent=hearts()+' of 3 golden hearts found';const pr=$('end').querySelector('.pr');
-if(!pr.dataset.x){pr.dataset.x=1;pr.prepend(mk('Read Letter 1',()=>showRew('A Letter from Kobby',x=>{const d=document.createElement('div');d.style.cssText='white-space:pre-wrap;text-align:left;max-height:56vh;overflow:auto;font-size:17px';d.textContent=LET1+'\n\nKobby ♥';x.appendChild(d)})),mk('Click to watch this video',()=>showRew('mmmm mmmm',x=>{const v=document.createElement('video');v.src='assets/videos/mmmm-mmmm.mp4';v.controls=true;v.playsInline=true;v.style.cssText='max-height:48vh;max-width:100%';const m=document.createElement('p');v.onerror=()=>{m.textContent='The video file is not available in this copy.'};x.append(v,m)})))}
+if(!pr.dataset.x){pr.dataset.x=1;pr.prepend(mk('Read Letter 1',()=>showRew('A Letter from Kobby',x=>{const d=document.createElement('div');d.style.cssText='white-space:pre-wrap;text-align:left;max-height:56vh;overflow:auto;font-size:17px';d.textContent=LET1+'\n\nKobby ♥';x.appendChild(d)})),mk('Click to watch this video',()=>showRew('mmmm mmmm',x=>{const v=document.createElement('video');v.src='assets/videos/mmmm-mmmm.mp4';v.controls=true;v.playsInline=true;v.volume=musicVolume;v.muted=mute;v.style.cssText='max-height:48vh;max-width:100%';const m=document.createElement('p');v.onerror=()=>{m.textContent='The video file is not available in this copy.'};x.append(v,m)})))}
 $('end').classList.remove('hide');sfx([523,659,784,1047])}
 addEventListener('keydown',e=>{const d={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0]}[e.key.toLowerCase()];if(d&&mode==='puz'&&window.pzKey){e.preventDefault();window.pzKey(d)}});
-function press(){if(!window.gameOn)return;if(!window.mIntro){window.mIntro=1;startMusic()}if(mode==='dlg')nx();else if(mode==='play'){const o=near();if(o)act(o)}}
-function startMusic(){const v=document.createElement('video');v.src='assets/music/be-happy.mp4';v.autoplay=true;v.loop=true;v.playsInline=true;v.muted=mute;v.style.cssText='position:fixed;right:10px;bottom:10px;z-index:10;height:80px';document.body.appendChild(v)}
-function start(){CH=CHARS[cur];GN=CH.id=='gospel'?'Bea':'Gospel';OB.find(o=>o.id=='gospel').ch=CH.id=='gospel'?{...CHARS.find(c=>c.id=='angel'),top:'#ffd6a5'}:CHARS.find(c=>c.id=='gospel');F=load();F.kofiShow=0;P={x:104,y:92,vx:0,vy:0,mv:0};PT=[];window.gameOn=true;$('welcome').classList.add('hide');document.querySelector('.app').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('game').classList.remove('hide');hud();mode='play';
+function press(){if(!window.gameOn)return;if(mode==='dlg')nx();else if(mode==='play'){const o=near();if(o)act(o)}}
+function start(){CH=CHARS[cur];GN=CH.id=='gospel'?'Bea':'Gospel';OB.find(o=>o.id=='gospel').ch=CH.id=='gospel'?{...CHARS.find(c=>c.id=='angel'),top:'#ffd6a5'}:CHARS.find(c=>c.id=='gospel');F=load();F.kofiShow=0;P={x:104,y:92,vx:0,vy:0,mv:0};PT=[];window.gameOn=true;$('welcome').classList.add('hide');document.querySelector('.app').classList.add('hide');delete $('end').dataset.xc;$('end').classList.add('hide');$('pz').classList.add('hide');$('inv').classList.remove('show');$('jrn').classList.remove('show');$('letters').classList.remove('show');$('letter').classList.remove('show');$('inv').classList.add('hide');$('jrn').classList.add('hide');$('letters').classList.add('hide');$('letter').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');hud();mode='play';
 if(!F.intro){F.intro=1;save();say([['','The square is bright, but its edges are grey. A note is pinned to the fountain.'],['The Keeper',NOTE],['','Move with the pad or arrow keys. Press A or Space to interact.']])}
 if(!raf){last=performance.now();raf=requestAnimationFrame(loop)}}
 function leave(){window.gameOn=false;mode='menu';$('game').classList.add('hide');document.querySelector('.app').classList.remove('hide')}
@@ -591,22 +606,23 @@ $('ps').onclick=()=>{pau^=1;$('ps').textContent=pau?'▶':'⏸'};
 $('thm').onclick=themeToggle;
 $('creditsBtn').onclick=showCredits;
 $('cr').onclick=()=>$('credits').classList.add('hide');
-$('mu').onclick=()=>{mute=!mute;$('mu').textContent=mute?'✕':'♪'};
+$('mu').onclick=()=>{mute=!mute;$('mu').textContent=mute?'✕':'♪';document.querySelectorAll('video').forEach(v=>{v.muted=mute})};
 // ---- Settings ----
-let sfxVolume=1,reducedAnimations=false;
+let sfxVolume=1,musicVolume=1,reducedAnimations=false;
 $('sx').onclick=()=>$('settings').classList.add('hide');
 function loadSettings(){
   try{
     const s=localStorage.getItem('lip_settings');
-    if(s){const o=JSON.parse(s);if(o.sfxVolume!=null)sfxVolume=o.sfxVolume;if(o.reducedAnimations!=null)reducedAnimations=o.reducedAnimations;}
+    if(s){const o=JSON.parse(s);if(o.sfxVolume!=null)sfxVolume=o.sfxVolume;if(o.musicVolume!=null)musicVolume=o.musicVolume;if(o.reducedAnimations!=null)reducedAnimations=o.reducedAnimations;}
   }catch(e){}
-  $('smv').value=Math.round(sfxVolume*100);$('sfxv').value=Math.round(sfxVolume*100);$('redA').checked=reducedAnimations;
+  $('smv').value=Math.round(musicVolume*100);$('sfxv').value=Math.round(sfxVolume*100);$('redA').checked=reducedAnimations;
 }
 function saveSettings(){
-  try{localStorage.setItem('lip_settings',JSON.stringify({sfxVolume:sfxVolume,reducedAnimations:reducedAnimations}))}catch(e){}
+  try{localStorage.setItem('lip_settings',JSON.stringify({sfxVolume:sfxVolume,musicVolume:musicVolume,reducedAnimations:reducedAnimations}))}catch(e){}
 }
-$('smv').oninput=(e)=>{sfxVolume=+$('smv').value/100;if(document.querySelector('video'))document.querySelector('video').volume=sfxVolume;saveSettings()};
-$('sfxv').oninput=(e)=>{sfxVolume=+$('sfxv').value/100;saveSettings()};
+function applyVideoVolume(){document.querySelectorAll('video').forEach(v=>{if(!v.muted)v.volume=musicVolume})}
+$('smv').oninput=()=>{musicVolume=+$('smv').value/100;applyVideoVolume();saveSettings()};
+$('sfxv').oninput=()=>{sfxVolume=+$('sfxv').value/100;saveSettings()};
 $('redA').onchange=(e)=>{reducedAnimations=$('redA').checked;saveSettings()};
 if(reducedAnimations){document.querySelectorAll('.sp2').forEach(el=>el.style.transition='none')}
 
@@ -627,8 +643,8 @@ function updateInv(){
     id.appendChild(div);
   });
 }
-function showInv(){mode='inv';$('inv').classList.remove('hide');$('jrn').classList.add('hide');$('letters').classList.add('hide');$('letter').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('welcome').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');$('hud').classList.remove('hide');hud();updateInv();$('inv').classList.add('show')}
-function hideInv(){mode='menu';$('inv').classList.remove('show');$('inv').classList.add('hide')}
+function showInv(){overlayFromEnd=!$('end').classList.contains('hide');mode='inv';$('inv').classList.remove('hide');$('jrn').classList.add('hide');$('letters').classList.add('hide');$('letter').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('welcome').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');$('hud').classList.remove('hide');hud();updateInv();$('inv').classList.add('show')}
+function hideInv(){if(overlayFromEnd){overlayFromEnd=false;$('end').classList.remove('hide');mode='end'}else mode=window.gameOn?'play':'menu';$('inv').classList.remove('show');$('inv').classList.add('hide')}
 $('invBtn').onclick=()=>{showInv();$('inv').classList.remove('hide')}
 $('ix').onclick=()=>hideInv()
 
@@ -649,10 +665,15 @@ function updateJrn(){
     id.appendChild(div);
   });
 }
-function showJrn(){mode='jrn';$('jrn').classList.remove('hide');$('inv').classList.add('hide');$('letters').classList.add('hide');$('letter').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('welcome').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');$('hud').classList.remove('hide');hud();updateJrn();$('jrn').classList.add('show')}
-function hideJrn(){mode='menu';$('jrn').classList.remove('show');$('jrn').classList.add('hide')}
+function showJrn(){overlayFromEnd=!$('end').classList.contains('hide');mode='jrn';$('jrn').classList.remove('hide');$('inv').classList.add('hide');$('letters').classList.add('hide');$('letter').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('welcome').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');$('hud').classList.remove('hide');hud();updateJrn();$('jrn').classList.add('show')}
+function hideJrn(){if(overlayFromEnd){overlayFromEnd=false;$('end').classList.remove('hide');mode='end'}else mode=window.gameOn?'play':'menu';$('jrn').classList.remove('show');$('jrn').classList.add('hide')}
 $('jrnBtn').onclick=()=>{showJrn();$('jrn').classList.remove('hide')}
+$('jrnBtnEnd').onclick=()=>{showJrn();$('jrn').classList.remove('hide')}
 $('jx').onclick=()=>hideJrn()
+$('letBtn').onclick=()=>showLetters()
+$('lx').onclick=()=>hideLetters()
+$('setBtn').onclick=()=>$('settings').classList.remove('hide')
+$('ec').onclick=()=>{$('end').classList.add('hide');mode='play'}
 
 // ---- Letter sheet ----
 function showLetter(){
@@ -665,7 +686,7 @@ function showLetter(){
   $('inv').classList.add('hide');$('jrn').classList.add('hide');$('letters').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('end').classList.add('hide');$('pz').classList.add('hide');$('welcome').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');$('hud').classList.remove('hide');hud();
   $('letter').classList.add('show')
 }
-function hideLetter(){mode='menu';$('letter').classList.remove('show');$('letter').classList.add('hide')}
+function hideLetter(){mode=window.gameOn?'play':'menu';$('letter').classList.remove('show');$('letter').classList.add('hide')}
 $('lx2').onclick=()=>hideLetter()
 addEventListener('keydown',e=>{if(!window.gameOn)return;const k=e.key.toLowerCase();if(k==='escape'&&(mode==='puz'||mode==='dlg')){if(mode==='puz')closePz();else nx()}if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();K[k]=1;if(!e.repeat&&(k===' '||k==='e'||k==='enter'))press()});
 addEventListener('keyup',e=>K[e.key.toLowerCase()]=0);
@@ -676,56 +697,30 @@ show(cur);
 loadSettings();
 
 // ---- Save export/import (QR code) ----
+function saveCode(){return JSON.stringify({v:SAVE_VER,...F})}
 function exportSave(){
+  const data=saveCode();
+  const box=$('qr-img');box.innerHTML='';
+  $('qr-modal').classList.remove('hide');
   try{
-    const data = JSON.stringify(F);
-    // Generate QR code and display it
-    const qr = new QRCode('qr-container', {
-      text: data,
-      width: 200,
-      height: 200,
-      colorDark: '#3b2a5a',
-      colorLight: '#faf0e8'
-    });
-    // Show QR code modal
-    $('qr-modal').classList.remove('hide');
-    $('qr-img').src = '';
-    // Build data URL
-    const canvas = document.createElement('canvas');
-    canvas.width = 200; canvas.height = 200;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#faf0e8';
-    ctx.fillRect(0, 0, 200, 200);
-    QRCode.toDataURL(data, {
-      width: 200,
-      margin: 1,
-      color: { dark: '#3b2a5a', light: '#faf0e8' }
-    }, (dataUrl) => {
-      $('qr-img').src = dataUrl;
-    });
-    $('qr-copy').onclick = () => {
-      navigator.clipboard.writeText(data).then(() => {
-        $('qr-copy').textContent = '✓ Copied!';
-        setTimeout(() => { $('qr-copy').textContent = 'Copy'; }, 2000);
-      });
-    };
-    $('qr-close').onclick = () => { $('qr-modal').classList.add('hide'); };
-    // Auto-hide after 30 seconds
-    setTimeout(() => { $('qr-modal').classList.add('hide'); }, 30000);
-  } catch(e){ say([['','Save export failed']]); }
+    if(typeof QRCode==='function'){
+      new QRCode(box,{text:data,width:200,height:200,colorDark:'#3b2a5a',colorLight:'#faf0e8',correctLevel:QRCode.CorrectLevel.L});
+    }else{
+      box.textContent='QR library unavailable — copy the save code below.';
+    }
+  }catch(e){box.textContent='QR could not be drawn — copy the save code below.'}
+  const ta=$('qr-text');if(ta)ta.value=data;
+  const done=()=>{$('qr-copy').textContent='✓ Copied!';setTimeout(()=>{$('qr-copy').textContent='Copy'},2000)};
+  $('qr-copy').onclick=()=>{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(data).then(done).catch(()=>{if(ta){ta.focus();ta.select();try{document.execCommand('copy')}catch(e){}}done()});
+    }else if(ta){ta.focus();ta.select();try{document.execCommand('copy')}catch(e){}done()}
+  };
+  $('qr-close').onclick=()=>$('qr-modal').classList.add('hide');
 }
 function importSave(){
-  // Open camera to scan QR code
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    say([['','Camera not supported on this device. Use a modern phone.']]);
-    return;
-  }
-  try{
-    const stream = navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } });
-    // For now, use the import file input as fallback
-    say([['','Import: point camera at QR code, or use file picker.']]);
-    $('imf').click();
-  } catch(e){ say([['','Camera access denied. Use file picker.']]); }
+  say([['','Choose your save file to import.']]);
+  const f=$('imf');if(f){f.value='';f.click()}
 }
 $('exp').onclick = exportSave;
 $('im').onclick = importSave;
@@ -736,19 +731,11 @@ $('imf').onchange = (e) => {
   r.onload = () => {
     try {
       const o = JSON.parse(r.result);
-      if(o && typeof o === 'object' && o.p1 !== undefined) {
-        // Validate save data
-        const DFkeys = Object.keys({}); // placeholder
-        F = { ...DF, ...o };
-        // Ensure all keys exist
-        const keys = ['intro','met','adjoa','glasses','p1','p2','p3','p4','key','gate','g1','gkey','garden','cafewelcome','c3a','c3b','c3c','cafe','c3w','knifeTut','c4a','c4b','c4c','bridge','gm','gf','c5a','c5b','c5c','ch5','c6qa','c6fin','ch6','ch2','ch3','ch4','sec'];
-        for(const k of keys){ if(!(k in F)) F[k] = 0; if(F[k] !== 0 && F[k] !== 1) F[k] = 1; }
-        save(); hud(); say([['','Save imported. Welcome back!']]);
-        $('qr-modal').classList.add('hide');
-      } else {
-        say([['','Invalid save file.']]);
-      }
-    } catch(e){ say([['','Invalid save file.']]); }
+      if(!o || typeof o !== 'object' || Array.isArray(o) || !Object.keys(DF).some(k=>k in o)) throw new Error('bad save');
+      F = coerceSave(o); save(); hud();
+      say([['','Save imported. Welcome back!']]);
+      $('qr-modal').classList.add('hide');
+    } catch(err){ say([['','That file is not a valid save.']]); }
   };
   r.readAsText(f);
   e.target.value = '';
@@ -758,7 +745,7 @@ const qrModal = document.createElement('div');
 qrModal.id = 'qr-modal';
 qrModal.className = 'hide';
 qrModal.style.cssText = 'position:fixed;inset:0;z-index:99;background:rgba(29,23,48,.85);display:flex;align-items:center;justify-content:center';
-qrModal.innerHTML = "<div style=\"background:#faf0e8;border:4px solid #3b2a5a;padding:20px;max-width:320px;text-align:center\"><div id=\"qr-img\" style=\"width:200px;height:200px;border:2px solid #3b2a5a\"></div><p style=\"margin:8px 0;font-size:14px\">Scan this QR code with your phone's camera, or press Copy to copy the save code.</p><div style=\"display:flex;gap:8px;justify-content:center\"><button id=\"qr-copy\" style=\"font:inherit;padding:6px 14px;background:#c9b6f2;border:3px solid #3b2a5a\">Copy</button><button id=\"qr-close\" style=\"font:inherit;padding:6px 14px;background:#c9b6f2;border:3px solid #3b2a5a\">Close</button></div></div>";
+qrModal.innerHTML = "<div style=\"background:#faf0e8;border:4px solid #3b2a5a;padding:20px;max-width:320px;text-align:center\"><div id=\"qr-img\" style=\"width:200px;height:200px;margin:0 auto;border:2px solid #3b2a5a;display:flex;align-items:center;justify-content:center;font-size:12px;overflow:hidden\"></div><p style=\"margin:8px 0;font-size:14px\">Scan this QR code with your phone's camera, or press Copy to copy the save code.</p><textarea id=\"qr-text\" readonly style=\"width:100%;height:60px;font-size:10px;resize:none\"></textarea><div style=\"display:flex;gap:8px;justify-content:center;margin-top:8px\"><button id=\"qr-copy\" style=\"font:inherit;padding:6px 14px;background:#c9b6f2;border:3px solid #3b2a5a\">Copy</button><button id=\"qr-close\" style=\"font:inherit;padding:6px 14px;background:#c9b6f2;border:3px solid #3b2a5a\">Close</button></div></div>";
 document.body.appendChild(qrModal);
 </script>
 </body>
