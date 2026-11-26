@@ -133,15 +133,14 @@ button{font:inherit;color:var(--ink);cursor:pointer}
     <h2 id="wt"></h2>
     <p>Your story awaits</p>
     <button class="go" id="mAdv">Adventure 🗝</button>
-    
-    
+    <button class="sm" id="mLoad" style="font-size:16px;padding:8px 14px">Load Game</button>
     <button class="go" id="back">Change explorer</button>
   </div>
 </div>
 <div id="game" class="hide">
  <div id="gw">
   <canvas id="gc" width="320" height="192"></canvas>
-  <div id="hud"><span id="hh" style="color:#ffb3d1"></span><span class="ob" id="ob"></span><button id="mu" aria-label="Mute">♪</button><button id="ps" aria-label="Pause">⏸</button><button id="thm" aria-label="Theme">Theme</button><button id="mn">Menu</button><button id="invBtn">Inv</button><button id="jrnBtn">Jrn</button></div>
+  <div id="hud"><span id="hh" style="color:#ffb3d1"></span><span class="ob" id="ob"></span><button id="mu" aria-label="Mute">♪</button><button id="ps" aria-label="Pause">⏸</button><button id="thm" aria-label="Theme">Theme</button><button id="mn">Menu</button><button id="invBtn">Inv</button><button id="jrnBtn">Jrn</button><button id="setBtnHud">Set</button></div>
   <div id="dlg" class="hide"></div>
   <div id="chapToast" class="hide" aria-live="polite"><span id="chapNum"></span><b id="chapName"></b></div>
   <div id="navToast" class="hide" aria-live="polite">
@@ -159,7 +158,7 @@ button{font:inherit;color:var(--ink);cursor:pointer}
 <div id="inv" class="hide"><div class="box"><h2>Inventory</h2><div id="invd"></div><div class="pr"><button class="sm" id="ix">Close</button></div></div></div>
 <div id="jrn" class="hide"><div class="box"><h2>Journal</h2><div id="jrd"></div><div class="pr"><button class="sm" id="jx">Close</button></div></div></div>
 <div id="letter" class="hide"><div class="box"><h2>Your Letter</h2><div id="letterd"></div><div class="pr"><button class="sm" id="lx2">Close</button></div></div></div>
- <div id="settings" class="hide"><div class="box"><h2>Settings</h2><label style="display:flex;gap:10px;align-items:center"><span style="width:70px">Music</span><input type="range" id="smv" min="0" max="100" value="100" style="flex:1"></label><label style="display:flex;gap:10px;align-items:center"><span style="width:70px">SFX</span><input type="range" id="sfxv" min="0" max="100" value="100" style="flex:1"></label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="redA"><span>Reduced animations</span></label><div class="pr"><button class="sm" id="sx">Close</button></div></div></div>
+ <div id="settings" class="hide"><div class="box"><h2>Settings</h2><label style="display:flex;gap:10px;align-items:center"><span style="width:70px">Music</span><input type="range" id="smv" min="0" max="100" value="100" style="flex:1"></label><label style="display:flex;gap:10px;align-items:center"><span style="width:70px">SFX</span><input type="range" id="sfxv" min="0" max="100" value="100" style="flex:1"></label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="redA"><span>Reduced animations</span></label><div class="pr" style="margin-top:4px"><button class="sm" id="saveBtn">Save Game</button><button class="sm" id="loadBtn">Load Game</button></div><p id="saveMsg" style="min-height:1.2em;font-size:14px;margin:0;color:var(--soft)"></p><div class="pr"><button class="sm" id="sx">Close</button></div></div></div>
   <div id="credits" class="hide"><div class="box"><h2>Credits</h2><p>Kobby — wrote the personal letter (Letter 1).</p><p>Mireille — the Little Café hostess.</p><p>Missy — the explorer you play.</p><p>The townspeople — were waiting.</p><div class="pr"><button class="sm" id="cr">Close</button></div></div></div>
  <div id="rot">Turn your phone sideways to play</div>
 </div>
@@ -483,6 +482,7 @@ function hideLetters(){if(overlayFromEnd){overlayFromEnd=false;$('end').classLis
 // ---- Chapter title + navigation popups ----
 let chapTimer=0,navTimer=0;
 const CHAPTERS={1:'The Little Town',2:'Garden of Beginnings',3:'Little Café',4:'Bridge of Stars',5:'Memory Castle',6:'Place of a Thousand Stars'};
+const CH_STARTS={1:{x:104,y:92},2:{x:344,y:104},3:{x:56,y:264},4:{x:360,y:168},5:{x:456,y:168},6:{x:504,y:168}};
 function showChapterIntro(n){
  const el=$('chapToast');
  $('chapNum').textContent='Chapter '+n;
@@ -637,6 +637,7 @@ addEventListener('keydown',e=>{const d={arrowup:[0,-1],arrowdown:[0,1],arrowleft
 function press(){if(!window.gameOn)return;if(mode==='dlg')nx();else if(mode==='play'){const o=near();if(o)act(o)}}
 function start(){CH=CHARS[cur];GN=CH.id=='gospel'?'Bea':'Gospel';OB.find(o=>o.id=='gospel').ch=CH.id=='gospel'?{...CHARS.find(c=>c.id=='angel'),top:'#ffd6a5'}:CHARS.find(c=>c.id=='gospel');F=load();F.kofiShow=0;P={x:104,y:92,vx:0,vy:0,mv:0};PT=[];window.gameOn=true;$('welcome').classList.add('hide');document.querySelector('.app').classList.add('hide');delete $('end').dataset.xc;$('end').classList.add('hide');$('pz').classList.add('hide');$('inv').classList.remove('show');$('jrn').classList.remove('show');$('letters').classList.remove('show');$('letter').classList.remove('show');$('inv').classList.add('hide');$('jrn').classList.add('hide');$('letters').classList.add('hide');$('letter').classList.add('hide');$('settings').classList.add('hide');$('credits').classList.add('hide');$('dlg').classList.add('hide');$('game').classList.remove('hide');hud();mode='play';
 const chn=F.ch6?6:F.ch5?6:F.bridge?5:F.cafe?4:F.garden?3:F.gate?2:1;
+if(CH_STARTS[chn]){P.x=CH_STARTS[chn].x;P.y=CH_STARTS[chn].y;P.vx=0;P.vy=0;P.mv=0}
 showChapterIntro(chn);showNavHelp();
 if(!F.intro){F.intro=1;save();say([['','The square is bright, but its edges are grey. A note is pinned to the fountain.'],['The Keeper',NOTE],['','Move with the pad or arrow keys. Press A or Space to interact.']])}
 if(!raf){last=performance.now();raf=requestAnimationFrame(loop)}}
@@ -649,7 +650,13 @@ $('cr').onclick=()=>$('credits').classList.add('hide');
 $('mu').onclick=()=>{mute=!mute;$('mu').textContent=mute?'✕':'♪';document.querySelectorAll('video').forEach(v=>{v.muted=mute})};
 // ---- Settings ----
 let sfxVolume=1,musicVolume=1,reducedAnimations=false;
-$('sx').onclick=()=>$('settings').classList.add('hide');
+function showSaveMsg(m,ok=true){const e=$('saveMsg');if(e){e.textContent=m;e.style.color=ok?'var(--soft)':'#c0392b';setTimeout(()=>{if(e.textContent===m)e.textContent=''},2200)}}
+$('sx').onclick=()=>{$('settings').classList.add('hide');$('saveMsg').textContent=''};
+$('saveBtn').onclick=()=>{try{save();showSaveMsg('Game saved.');sfx([523,659])}catch(e){showSaveMsg('Could not save game.',false)}};
+function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw){showSaveMsg('No saved game found.',false);$('settings').classList.remove('hide');return}$('settings').classList.add('hide');start();$('saveMsg').textContent='Game loaded.';$('saveMsg').style.color='var(--soft)';$('settings').classList.remove('hide');setTimeout(()=>{$('settings').classList.add('hide');$('saveMsg').textContent=''},1400)}catch(e){showSaveMsg('Could not load game.',false);$('settings').classList.remove('hide')}}
+$('loadBtn').onclick=loadGame;
+$('mLoad').onclick=()=>{try{const raw=localStorage.getItem(SAVE_KEY);if(!raw){alert('No saved game found.');return}start()}catch(e){alert('Could not load game.')}};
+$('setBtnHud').onclick=()=>{$('saveMsg').textContent='';$('settings').classList.remove('hide')};
 function loadSettings(){
   try{
     const s=localStorage.getItem('lip_settings');
@@ -714,7 +721,7 @@ $('letBtn').onclick=()=>showLetters()
 $('lx').onclick=()=>hideLetters()
 $('ntOk').onclick=()=>hideNavHelp()
 $('setBtn').onclick=()=>$('settings').classList.remove('hide')
-$('ec').onclick=()=>{const n=+$('end').dataset.xc;const next=Math.min(6,n+1);const starts={2:{x:344,y:104},3:{x:56,y:264},4:{x:360,y:168},5:{x:456,y:168},6:{x:504,y:168}};$('end').classList.add('hide');mode='play';if(P&&starts[next]){P.x=starts[next].x;P.y=starts[next].y;P.vx=0;P.vy=0;P.mv=0}if(n>=1&&n<6)showChapterIntro(next);save()}
+$('ec').onclick=()=>{const n=+$('end').dataset.xc;const next=Math.min(6,n+1);$('end').classList.add('hide');mode='play';if(P&&CH_STARTS[next]){P.x=CH_STARTS[next].x;P.y=CH_STARTS[next].y;P.vx=0;P.vy=0;P.mv=0}if(n>=1&&n<6)showChapterIntro(next);save()}
 
 // ---- Letter sheet ----
 function showLetter(){
