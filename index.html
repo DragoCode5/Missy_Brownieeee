@@ -714,7 +714,7 @@ $('letBtn').onclick=()=>showLetters()
 $('lx').onclick=()=>hideLetters()
 $('ntOk').onclick=()=>hideNavHelp()
 $('setBtn').onclick=()=>$('settings').classList.remove('hide')
-$('ec').onclick=()=>{const n=+$('end').dataset.xc;$('end').classList.add('hide');mode='play';if(n>=1&&n<6)showChapterIntro(n+1)}
+$('ec').onclick=()=>{const n=+$('end').dataset.xc;const next=Math.min(6,n+1);const starts={2:{x:344,y:104},3:{x:56,y:264},4:{x:360,y:168},5:{x:456,y:168},6:{x:504,y:168}};$('end').classList.add('hide');mode='play';if(P&&starts[next]){P.x=starts[next].x;P.y=starts[next].y;P.vx=0;P.vy=0;P.mv=0}if(n>=1&&n<6)showChapterIntro(next);save()}
 
 // ---- Letter sheet ----
 function showLetter(){
